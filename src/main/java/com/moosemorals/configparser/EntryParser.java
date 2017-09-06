@@ -45,7 +45,7 @@ public class EntryParser extends AbstractParser {
     private boolean isStartWord(String word) {
         return word.equals("config") || word.equals("menuconfig") || word.equals("choice") || word.equals("menu");
     }
-    
+
     public Entry parse(KconfigFile t) throws IOException {
 
         Entry e;
@@ -77,17 +77,17 @@ public class EntryParser extends AbstractParser {
                             case "comment":
                             case "menu":
                             case "if":
-                            case "source":                               
+                            case "source":
                                 t.pushBack();
                                 return e;
                             case "string":
                             case "bool":
                             case "tristate":
                             case "int":
-                            case "hex":                                
+                            case "hex":
                                 readType(t, e);
                                 break;
-                            case "option":                                
+                            case "option":
                                 readOption(t, e);
                                 break;
                             case "help":
@@ -107,11 +107,11 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readType(KconfigFile t, Entry e) throws IOException {        
+    private void readType(KconfigFile t, Entry e) throws IOException {
         e.setType(t.getTokenString());
         while (true) {
             switch (t.nextToken()) {
-                case ConfigParser.QUOTE_CHAR:                    
+                case ConfigParser.QUOTE_CHAR:
                     e.setPrompt(t.getTokenString());
                     break;
                 case StreamTokenizer.TT_EOL:
@@ -122,7 +122,7 @@ public class EntryParser extends AbstractParser {
                     return;
             }
         }
-    }        
+    }
 
     private void readOption(KconfigFile t, Entry e) throws IOException {
         int token = t.nextToken();
@@ -134,14 +134,14 @@ public class EntryParser extends AbstractParser {
             case "env":
                 token = t.nextToken();
                 if (token != '=') {
-                    throw new ParseError(t,  "option env needs an '='");
+                    throw new ParseError(t, "option env needs an '='");
                 }
                 token = t.nextToken();
                 if (token != ConfigParser.QUOTE_CHAR) {
                     throw new ParseError(t, "option env needs a quoted string");
                 }
 
-                String envName = t.getTokenString();                
+                String envName = t.getTokenString();
                 if (environment.contains(envName)) {
                     e.setValue(environment.get(envName));
                 }
@@ -156,29 +156,52 @@ public class EntryParser extends AbstractParser {
 
     private void readHelp(KconfigFile t, Entry e) throws IOException {
         skip(t);
+        log.debug("Reading help");
+
         String line = t.nextLine();
-        
-        int indent = 0;
-        while (line.charAt(indent) == ' ') {
-            indent += 1;
+        while (line.length() == 0) {
+            line = t.nextLine();
         }
+
+        log.debug("Read line {}", line);
+        line = line.replace("\t", "        ");
                 
-        StringBuilder help = new StringBuilder();
-        help.append(line.substring(indent));
+        int indent = line.indexOf(line.trim());
+
+        log.debug("Indent is {}", indent);
         
+        if (indent == 0) {
+            throw new ParseError(t, "Badly formed help");
+        }
+
+        StringBuilder help = new StringBuilder();
+        help.append(line);
+
         while ((line = t.nextLine()) != null) {
             int offset = 0;
-            while (line.charAt(offset) == ' ') {
-                offset += 1;
+            
+            if (line.length() > 0) {
+                line = line.replace("\t", "        ");
+                offset = line.indexOf(line.trim());               
             }
             
+            log.debug("Read line {} [{}]", offset, line);
+
             if (offset != indent) {
-                e.setHelp(help.toString());
-                return;
+                if (line.length() > 0) {
+                    t.pushBackLine(line);
+                    break;
+                } else {
+                    help.append("\n");
+                }
             } else {
                 help.append(line);
             }
         }
+
+        log.debug("Done reading help");
+        e.setHelp(help.toString());
+        return;
     }
 
 }
