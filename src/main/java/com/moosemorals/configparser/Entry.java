@@ -38,6 +38,7 @@ public class Entry {
     private String type;
     private String value;
     private String prompt;
+    private String help;
 
     Entry(String symbol) {
         this.symbol = symbol;
@@ -75,6 +76,16 @@ public class Entry {
         this.type = type;
     }
 
+    public String getHelp() {
+        return help;
+    }
+
+    public void setHelp(String help) {
+        this.help = help;
+    }
+    
+    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder()
@@ -91,6 +102,10 @@ public class Entry {
         
         if (prompt != null) {
             result.append(" '").append(prompt).append("'");
+        }
+        
+        if (help != null) {
+            result.append(" (help: ").append(help.length()).append(")");
         }
 
         result.append("]");

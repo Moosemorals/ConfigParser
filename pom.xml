@@ -12,6 +12,24 @@
     </properties>
     <name>Config Parser</name>
     <description>Parse Linux Kernel  kconfig into a JSON blob</description>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.moosemorals.configparser.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <dependency>
             <groupId>ch.qos.logback</groupId>

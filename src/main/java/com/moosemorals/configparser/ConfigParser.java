@@ -23,9 +23,7 @@
  */
 package com.moosemorals.configparser;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.Deque;
@@ -37,30 +35,24 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Osric Wilkinson (osric@fluffypeople.com)
- */
-public class ConfigParser {
+public class ConfigParser extends AbstractParser {
 
     public static final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
     public static final int QUOTE_CHAR = '"';
     private static final int HASH_CHAR = '#';
 
-    private final Deque<StreamTokenizer> tokenizerStack;
+    private final Deque<KconfigFile> fileStack;
     private final Environment environment;
-
     private final Map<String, Entry> entries;
 
     public ConfigParser(Environment environment) {
         this.environment = environment;
         this.entries = new HashMap<>();
-        tokenizerStack = new LinkedList<>();
+        fileStack = new LinkedList<>();
     }
 
     String replaceSymbols(String original) {
-        log.debug("Looking for stuff in {}", original);
         Pattern p = Pattern.compile("\\$([A-Za-z_]+)");
         Matcher m = p.matcher(original);
         StringBuffer sb = new StringBuffer();
@@ -81,36 +73,35 @@ public class ConfigParser {
         entries.put(e.getSymbol(), e);
     }
 
-    private StreamTokenizer source(File target) throws IOException {
-        StreamTokenizer t = new StreamTokenizer(new BufferedReader(new FileReader(target)));
-        t.eolIsSignificant(true);
-        t.slashSlashComments(false);
-        t.slashStarComments(false);
-        t.quoteChar(QUOTE_CHAR);
+    private KconfigFile source(File target) throws IOException {
 
-        log.info("Changing source to {}", target);
-        tokenizerStack.push(t);
+        KconfigFile t = new KconfigFile(target);
+        fileStack.push(t);
+        log.debug("Source: {} Changing to {}", getDepth(), t);
         return t;
     }
 
-    private StreamTokenizer source(StreamTokenizer t) throws IOException {
+    private KconfigFile source(KconfigFile t) throws IOException {
 
         int token = t.nextToken();
         if (token != QUOTE_CHAR) {
-            throw new IllegalStateException("Source without quoted string");
+            throw new ParseError(t, "Source without quoted string");
         }
 
-        String target = replaceSymbols(t.sval);
+        String target = replaceSymbols(t.getTokenString());
+
+        skip(t);
 
         return source(new File(Main.SOURCE_FOLDER, target));
     }
 
+    private int getDepth() {
+        return ((LinkedList) fileStack).size();
+    }
+
     public void parse(File target) throws IOException {
 
-        StreamTokenizer t = source(target);
-
-        boolean inComment = false;
-        Entry e;
+        KconfigFile t = source(target);
 
         int token;
         OUTER:
@@ -118,47 +109,35 @@ public class ConfigParser {
             token = t.nextToken();
             switch (token) {
                 case StreamTokenizer.TT_EOF:
-                    if (tokenizerStack.isEmpty()) {
+                    if (fileStack.isEmpty()) {
+                        log.debug("Completed parse");
                         break OUTER;
-                    } else {                        
-                        t = tokenizerStack.pop();
+                    } else {
+                        fileStack.pop();
+                        t = fileStack.peek();
+                        log.debug("Back to {}", t.getPath());
                     }
+                    break;
+
                 case HASH_CHAR:
-                    inComment = true;
-
+                    skip(t);
+                    break;
                 case StreamTokenizer.TT_WORD:
-                    if (inComment) {
-                        continue;
-                    }
-
-                    switch (t.sval) {
-                        case "config":
-                            e = new EntryParser(environment).parse(t);
-                            log.debug("Read entry {}", e);
-                            addEntry(e);
+                    switch (t.getTokenString()) {
+                        case "config":                        
+                            addEntry(new EntryParser(environment).parse(t));
                             break;
                         case "source":
-                            log.debug("Reading source");
                             t = source(t);
                             break;
                         default:
-                            log.debug("skipping {}", t.sval);
+                            skip(t);
                             break;
                     }
 
                     break;
-                case StreamTokenizer.TT_NUMBER:
-                    log.debug("Skipping number {}", t.nval);
-                    break;
-                case StreamTokenizer.TT_EOL:
-                    if (inComment) {
-                        inComment = false;
-                    }
-                    break;
                 default:
-                    if (!inComment) {
-                        log.warn(String.format("Unexpected Word: %c", (char) token));
-                    }
+
                     break;
 
             }

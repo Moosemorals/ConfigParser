@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser;
 
 import java.io.IOException;
@@ -33,68 +32,72 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class EntryParser {
+public class EntryParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(EntryParser.class);
-    
+
     private final Environment environment;
-    
+
     public EntryParser(Environment e) {
         this.environment = e;
     }
-        
-    public Entry parse(StreamTokenizer t) throws IOException {
+
+    private boolean isStartWord(String word) {
+        return word.equals("config") || word.equals("menuconfig") || word.equals("choice") || word.equals("menu");
+    }
+    
+    public Entry parse(KconfigFile t) throws IOException {
 
         Entry e;
-        if (!t.sval.equals("config")) {
-            throw new IllegalStateException("Must be called on config");
+        if (!isStartWord(t.getTokenString())) {
+            throw new ParseError(t, "Must be called on start word");
         }
 
         if (t.nextToken() != StreamTokenizer.TT_WORD) {
-            throw new IllegalStateException("Expecting word to follow 'config'");
+            throw new ParseError(t, "Expecting word to follow 'config'");
         }
 
-        e = new Entry(t.sval);
+        e = new Entry(t.getTokenString());
 
         while (true) {
             int token = t.nextToken();
 
             switch (token) {
                 case StreamTokenizer.TT_EOF:
-                    log.debug("End of file");
                     t.pushBack();
                     return e;
 
                 case StreamTokenizer.TT_EOL:
                     token = t.nextToken();
                     if (token == StreamTokenizer.TT_WORD) {
-                        switch (t.sval) {
+                        switch (t.getTokenString()) {
                             case "config":
                             case "menuconfig":
                             case "choice":
                             case "comment":
                             case "menu":
                             case "if":
-                            case "source":
-                                log.debug("End of entry");
+                            case "source":                               
                                 t.pushBack();
                                 return e;
                             case "string":
                             case "bool":
                             case "tristate":
                             case "int":
-                            case "hex":
-                                log.debug("Reading Type");
+                            case "hex":                                
                                 readType(t, e);
                                 break;
-                            case "option":
-                                log.debug("Reading option");
+                            case "option":                                
                                 readOption(t, e);
                                 break;
+                            case "help":
+                                readHelp(t, e);
                             default:
                                 skip(t);
                                 break;
                         }
+                    } else if (token == '-') {
+                        readHelp(t, e);
                     }
                     // else
                     t.pushBack();
@@ -103,58 +106,79 @@ public class EntryParser {
             }
         }
     }
-    
-    private void skip(StreamTokenizer t) throws IOException {        
-        while (true) {
-            int token = t.nextToken();
-            if (token == StreamTokenizer.TT_EOL && token == StreamTokenizer.TT_EOF) {
-                t.pushBack();
-                return;
-            }            
-        }        
-    }
-    
-    private  void readType(StreamTokenizer t, Entry e) throws IOException {
-        e.setType(t.sval);
-        if (t.nextToken() == ConfigParser.QUOTE_CHAR) {
-            e.setPrompt(t.sval);
-        } else {
-            t.pushBack();
-        }
-    }
 
-    private  void readOption(StreamTokenizer t, Entry e) throws IOException {
+    private void readType(KconfigFile t, Entry e) throws IOException {        
+        e.setType(t.getTokenString());
+        while (true) {
+            switch (t.nextToken()) {
+                case ConfigParser.QUOTE_CHAR:                    
+                    e.setPrompt(t.getTokenString());
+                    break;
+                case StreamTokenizer.TT_EOL:
+                    t.pushBack();
+                    return;
+                default:
+                    skip(t);
+                    return;
+            }
+        }
+    }        
+
+    private void readOption(KconfigFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token != StreamTokenizer.TT_WORD) {
-            throw new IllegalStateException("Option without word");
+            throw new ParseError(t, "Option without word");
         }
-        
-        switch (t.sval) {
+
+        switch (t.getTokenString()) {
             case "env":
                 token = t.nextToken();
                 if (token != '=') {
-                    throw new IllegalStateException("option env needs an '='");
+                    throw new ParseError(t,  "option env needs an '='");
                 }
                 token = t.nextToken();
                 if (token != ConfigParser.QUOTE_CHAR) {
-                    throw new IllegalStateException("option env needs a quoted string");
+                    throw new ParseError(t, "option env needs a quoted string");
                 }
-                
-                String envName = t.sval;
-                log.debug("Looking for {} in environment", envName);
-                
+
+                String envName = t.getTokenString();                
                 if (environment.contains(envName)) {
                     e.setValue(environment.get(envName));
                 }
-                                
+
                 break;
             default:
-                // ignore options
-                log.debug("ignoring option {}", t.sval);
+                // ignore options                
                 skip(t);
                 break;
         }
+    }
+
+    private void readHelp(KconfigFile t, Entry e) throws IOException {
+        skip(t);
+        String line = t.nextLine();
         
+        int indent = 0;
+        while (line.charAt(indent) == ' ') {
+            indent += 1;
+        }
+                
+        StringBuilder help = new StringBuilder();
+        help.append(line.substring(indent));
+        
+        while ((line = t.nextLine()) != null) {
+            int offset = 0;
+            while (line.charAt(offset) == ' ') {
+                offset += 1;
+            }
+            
+            if (offset != indent) {
+                e.setHelp(help.toString());
+                return;
+            } else {
+                help.append(line);
+            }
+        }
     }
 
 }
