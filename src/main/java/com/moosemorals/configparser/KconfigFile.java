@@ -84,14 +84,19 @@ public final class KconfigFile {
         t.pushBack();
     }
     
-    public String nextLine() throws IOException {
+    public String readLine() throws IOException {
         lines += 1;
         
         StringBuilder line = new StringBuilder();
-        int c;
+        int c; 
+        boolean inComment = false;
         while ((c = in.read()) != -1) {
-            if (c != '\n') {
-                line.appendCodePoint(c);
+            if (c == ConfigParser.COMMENT_CHAR) {
+                inComment = true;
+            } else if (c != '\n') {
+                if (!inComment) {
+                    line.appendCodePoint(c);
+                }
             } else {
                 break;
             }
@@ -104,7 +109,7 @@ public final class KconfigFile {
         return line.toString();        
     }
     
-    public void pushBackLine(String line) throws IOException {        
+    public void unreadLine(String line) throws IOException {        
         lines -= 1;
         line = line + '\n';
         in.unread(line.toCharArray());        

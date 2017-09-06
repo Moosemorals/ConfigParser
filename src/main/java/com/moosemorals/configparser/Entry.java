@@ -23,6 +23,8 @@
  */
 package com.moosemorals.configparser;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,9 @@ public class Entry {
     private static final Logger log = LoggerFactory.getLogger(Entry.class);
 
     private final String symbol;
+    private final List<Default> defaults;
+    private final List<Select> selects;
+    private final List<Implies> implies;
     private String type;
     private String value;
     private String prompt;
@@ -43,6 +48,9 @@ public class Entry {
 
     Entry(String symbol) {
         this.symbol = symbol;
+        this.defaults = new LinkedList<>();
+        this.selects = new LinkedList<>();
+        this.implies = new LinkedList<>();
     }
 
     public String getSymbol() {
@@ -89,10 +97,38 @@ public class Entry {
         return depends;
     }
 
-    public void setDepends(String depends) {
-        this.depends = depends;
+    public void addDepends(String depends) {
+        if (this.depends == null) {
+            this.depends = depends;
+        } else {
+            this.depends += " && " + depends;
+        }
     }
-    
+
+    public void addDefault(Default def) {
+        defaults.add(def);
+    }
+
+    public List<Default> getDefaults() {
+        return defaults;
+    }
+
+    public void addSelects(Select select) {
+        selects.add(select);
+    }
+
+    public List<Select> getSelects() {
+        return selects;
+    }
+
+    public void addImplies(Implies select) {
+        implies.add(select);
+    }
+
+    public List<Implies> getImplies() {
+        return implies;
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder()
@@ -106,11 +142,11 @@ public class Entry {
         if (value != null) {
             result.append("=").append(value);
         }
-        
+
         if (prompt != null) {
             result.append(" '").append(prompt).append("'");
         }
-        
+
         if (help != null) {
             result.append(" (help: ").append(help.length()).append(")");
         }
@@ -118,7 +154,17 @@ public class Entry {
         if (depends != null) {
             result.append(" (depends: ").append(depends).append(")");
         }
+
         
+        if (!defaults.isEmpty()) {
+            result.append(" (def: ");
+            for (int i = 0; i < defaults.size(); i += 1) {
+                if (i != 0) {
+                    result.append(", ");
+                }
+                result.append(defaults.get(i));
+            }
+        }
         result.append("]");
 
         return result.toString();

@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser;
 
 import java.io.IOException;
@@ -36,13 +35,12 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
-    
-    
+
     protected String skip(KconfigFile t) throws IOException {
         StringBuilder skipped = new StringBuilder();
         while (true) {
             int token = t.nextToken();
-            if (token == StreamTokenizer.TT_EOL || token == StreamTokenizer.TT_EOF) {                
+            if (token == StreamTokenizer.TT_EOL || token == StreamTokenizer.TT_EOF) {
                 t.pushBack();
                 return skipped.toString();
             } else {
@@ -53,6 +51,55 @@ public abstract class AbstractParser {
                 }
             }
         }
-    }        
+    }
+
+    protected String readExpression(KconfigFile t) throws IOException {
+        StringBuilder result = new StringBuilder();
+
+        String symbol;
+        while (true) {
+            int token = t.nextToken();
+            switch (token) {
+                case '(':
+                    result.append("(");
+                    result.append(readExpression(t));
+                    break;
+                case ')':
+                    result.append(")");
+                    break;
+                case '!':
+                    result.append("!");
+                    result.append(readExpression(t));
+                    break;
+                case StreamTokenizer.TT_WORD:
+                    symbol = t.getTokenString();
+                    if (symbol.equals("if")) {
+                        t.pushBack();
+                        return result.toString();
+                    }
+                    result.append(symbol);
+                    break;
+                case ConfigParser.QUOTE_CHAR:                    
+                    result.append('"');
+                    result.append(t.getTokenString());
+                    result.append('"');
+                    break;
+                case '&':
+                    t.nextToken(); // should be '&';
+                    result.append("&&");
+                    result.append(readExpression(t));
+                    break;
+                case '|':
+                    t.nextToken();
+                    result.append("||");
+                    result.append(readExpression(t));
+                    break;
+                case StreamTokenizer.TT_EOL:
+                default:
+                    t.pushBack();
+                    return result.toString();
+            }
+        }
+    }
 
 }

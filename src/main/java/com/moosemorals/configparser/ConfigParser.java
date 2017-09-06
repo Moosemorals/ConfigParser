@@ -40,7 +40,7 @@ public class ConfigParser extends AbstractParser {
     public static final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
     public static final int QUOTE_CHAR = '"';
-    private static final int HASH_CHAR = '#';
+    public static final int COMMENT_CHAR = '#';
 
     private final Deque<KconfigFile> fileStack;
     private final Environment environment;
@@ -105,7 +105,7 @@ public class ConfigParser extends AbstractParser {
             }
         }
 
-        log.debug("skip source  {}", skip(t));
+        skip(t);
 
         log.debug("Opening {} from {}:{}", target, t.getPath(), t.getLineNumber());
         return source(new File(Main.SOURCE_FOLDER, target));
@@ -135,8 +135,8 @@ public class ConfigParser extends AbstractParser {
                     }
                     break;
 
-                case HASH_CHAR:
-                    log.debug("skip comment  {}", skip(t));
+                case COMMENT_CHAR:
+                    skip(t);
                     break;
                 case StreamTokenizer.TT_EOL:
                     // ignored
@@ -154,10 +154,10 @@ public class ConfigParser extends AbstractParser {
                             t = source(t);
                             break;
                         case "if":
-                            log.debug("skip if {}", skip(t));
+                            skip(t);
                             break;
                         default:
-                            log.debug("skip default {}", skip(t));
+                            skip(t);
                             break;
                     }
 
