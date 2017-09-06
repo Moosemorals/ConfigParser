@@ -68,6 +68,10 @@ public final class KconfigFile {
         return t.nextToken();
     }
     
+    public int currentToken() {
+        return t.ttype;
+    }
+    
     public String getTokenString() {
         return t.sval;
     }

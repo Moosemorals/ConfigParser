@@ -82,16 +82,32 @@ public class ConfigParser extends AbstractParser {
     }
 
     private KconfigFile source(KconfigFile t) throws IOException {
-
+        String target;
         int token = t.nextToken();
-        if (token != QUOTE_CHAR) {
-            throw new ParseError(t, "Source without quoted string");
+        if (token == QUOTE_CHAR) {
+            target = replaceSymbols(t.getTokenString());
+        } else {
+            StringBuilder result = new StringBuilder();
+            OUTER: while (true) {
+                switch (token) {
+                    case StreamTokenizer.TT_EOL:
+                        target = result.toString();
+                        t.pushBack();
+                        break OUTER;
+                    case StreamTokenizer.TT_WORD:
+                        result.append(t.getTokenString());
+                        break;
+                    default:
+                        result.appendCodePoint(token);
+                        break;
+                }
+                token = t.nextToken();
+            }
         }
 
-        String target = replaceSymbols(t.getTokenString());
+        log.debug("skip source  {}", skip(t));
 
-        skip(t);
-
+        log.debug("Opening {} from {}:{}", target, t.getPath(), t.getLineNumber());
         return source(new File(Main.SOURCE_FOLDER, target));
     }
 
@@ -109,29 +125,39 @@ public class ConfigParser extends AbstractParser {
             token = t.nextToken();
             switch (token) {
                 case StreamTokenizer.TT_EOF:
+                    fileStack.pop();
                     if (fileStack.isEmpty()) {
                         log.debug("Completed parse");
                         break OUTER;
-                    } else {
-                        fileStack.pop();
+                    } else {                        
                         t = fileStack.peek();
                         log.debug("Back to {}", t.getPath());
                     }
                     break;
 
                 case HASH_CHAR:
-                    skip(t);
+                    log.debug("skip comment  {}", skip(t));
+                    break;
+                case StreamTokenizer.TT_EOL:
+                    // ignored
                     break;
                 case StreamTokenizer.TT_WORD:
                     switch (t.getTokenString()) {
-                        case "config":                        
-                            addEntry(new EntryParser(environment).parse(t));
+                        case "config":
+                        case "menuconfig":
+                            log.debug("Starting entry");
+                            Entry e = new EntryParser(environment).parse(t);
+                            log.debug("Entry complete {}", e);
+                            addEntry(e);
                             break;
                         case "source":
                             t = source(t);
                             break;
+                        case "if":
+                            log.debug("skip if {}", skip(t));
+                            break;
                         default:
-                            skip(t);
+                            log.debug("skip default {}", skip(t));
                             break;
                     }
 
@@ -143,6 +169,5 @@ public class ConfigParser extends AbstractParser {
             }
         }
     }
-
 
 }

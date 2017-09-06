@@ -65,43 +65,41 @@ public class EntryParser extends AbstractParser {
             switch (token) {
                 case StreamTokenizer.TT_EOF:
                     t.pushBack();
-                    return e;
-
-                case StreamTokenizer.TT_EOL:
-                    token = t.nextToken();
-                    if (token == StreamTokenizer.TT_WORD) {
-                        switch (t.getTokenString()) {
-                            case "config":
-                            case "menuconfig":
-                            case "choice":
-                            case "comment":
-                            case "menu":
-                            case "if":
-                            case "source":
-                                t.pushBack();
-                                return e;
-                            case "string":
-                            case "bool":
-                            case "tristate":
-                            case "int":
-                            case "hex":
-                                readType(t, e);
-                                break;
-                            case "option":
-                                readOption(t, e);
-                                break;
-                            case "help":
-                                readHelp(t, e);
-                            default:
-                                skip(t);
-                                break;
-                        }
-                    } else if (token == '-') {
-                        readHelp(t, e);
+                    return e;                
+                case StreamTokenizer.TT_WORD:
+                    switch (t.getTokenString()) {
+                        case "config":
+                        case "menuconfig":
+                        case "choice":
+                        case "comment":
+                        case "menu":
+                        case "endmenu":
+                        case "if":
+                        case "endif":
+                        case "source":
+                            t.pushBack();
+                            return e;
+                        case "string":
+                        case "bool":
+                        case "tristate":
+                        case "int":
+                        case "hex":
+                            readType(t, e);
+                            break;
+                        case "option":
+                            readOption(t, e);
+                            break;
+                        case "help":
+                        case "---help---":
+                            readHelp(t, e);
+                            break;
+                        case "depends":
+                            readDepends(t, e);
+                            break;
+                        default:
+                            log.debug("skip entry  {}", skip(t));
+                            break;
                     }
-                    // else
-                    t.pushBack();
-
                     break;
             }
         }
@@ -115,10 +113,9 @@ public class EntryParser extends AbstractParser {
                     e.setPrompt(t.getTokenString());
                     break;
                 case StreamTokenizer.TT_EOL:
-                    t.pushBack();
                     return;
                 default:
-                    skip(t);
+                    log.debug("skip tpye {}", skip(t));
                     return;
             }
         }
@@ -149,29 +146,38 @@ public class EntryParser extends AbstractParser {
                 break;
             default:
                 // ignore options                
-                skip(t);
+                log.debug("skip options  {}", skip(t));
+                t.nextToken(); // throw away EOL
                 break;
         }
     }
 
     private void readHelp(KconfigFile t, Entry e) throws IOException {
-        skip(t);
-        log.debug("Reading help");
+
+        if (t.currentToken() != StreamTokenizer.TT_EOL) {
+            log.debug("skip help  {}", skip(t));
+        }
+        t.nextToken();
 
         String line = t.nextLine();
+        if (line == null) {
+            // EOF
+            return;
+        }
         while (line.length() == 0) {
             line = t.nextLine();
+            if (line == null) {
+                // EOF
+                return;
+            }
         }
-
-        log.debug("Read line {}", line);
         line = line.replace("\t", "        ");
-                
+
         int indent = line.indexOf(line.trim());
 
-        log.debug("Indent is {}", indent);
-        
         if (indent == 0) {
-            throw new ParseError(t, "Badly formed help");
+            // No help
+            return;
         }
 
         StringBuilder help = new StringBuilder();
@@ -179,15 +185,13 @@ public class EntryParser extends AbstractParser {
 
         while ((line = t.nextLine()) != null) {
             int offset = 0;
-            
+
             if (line.length() > 0) {
                 line = line.replace("\t", "        ");
-                offset = line.indexOf(line.trim());               
+                offset = line.indexOf(line.trim());
             }
             
-            log.debug("Read line {} [{}]", offset, line);
-
-            if (offset != indent) {
+            if (offset < indent) {
                 if (line.length() > 0) {
                     t.pushBackLine(line);
                     break;
@@ -198,10 +202,33 @@ public class EntryParser extends AbstractParser {
                 help.append(line);
             }
         }
-
-        log.debug("Done reading help");
         e.setHelp(help.toString());
         return;
+    }
+
+    private void readDepends(KconfigFile t, Entry e) throws IOException {
+        int token = t.nextToken();
+        if (token != StreamTokenizer.TT_WORD || !t.getTokenString().equals("on")) {
+            throw new ParseError(t, "'on' must follow depends");
+        }
+
+        StringBuilder depends = new StringBuilder();
+        OUTER:
+        while (true) {
+            token = t.nextToken();
+            switch (token) {
+                case StreamTokenizer.TT_EOL:
+                    e.setDepends(depends.toString());
+                    break OUTER;
+                case StreamTokenizer.TT_WORD:
+                    depends.append(t.getTokenString());
+                    depends.append(" ");
+                    break;
+                default:                    
+                    depends.appendCodePoint(token);
+                    break;
+            }
+        }
     }
 
 }

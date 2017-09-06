@@ -38,12 +38,19 @@ public abstract class AbstractParser {
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
     
     
-    protected void skip(KconfigFile t) throws IOException {
+    protected String skip(KconfigFile t) throws IOException {
+        StringBuilder skipped = new StringBuilder();
         while (true) {
             int token = t.nextToken();
-            if (token == StreamTokenizer.TT_EOL || token == StreamTokenizer.TT_EOF) {
+            if (token == StreamTokenizer.TT_EOL || token == StreamTokenizer.TT_EOF) {                
                 t.pushBack();
-                return;
+                return skipped.toString();
+            } else {
+                if (token == StreamTokenizer.TT_WORD) {
+                    skipped.append(t.getTokenString()).append(" ");
+                } else {
+                    skipped.appendCodePoint(token);
+                }
             }
         }
     }        

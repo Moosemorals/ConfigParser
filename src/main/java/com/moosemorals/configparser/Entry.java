@@ -39,6 +39,7 @@ public class Entry {
     private String value;
     private String prompt;
     private String help;
+    private String depends;
 
     Entry(String symbol) {
         this.symbol = symbol;
@@ -83,9 +84,15 @@ public class Entry {
     public void setHelp(String help) {
         this.help = help;
     }
-    
-    
 
+    public String getDepends() {
+        return depends;
+    }
+
+    public void setDepends(String depends) {
+        this.depends = depends;
+    }
+    
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder()
@@ -108,6 +115,10 @@ public class Entry {
             result.append(" (help: ").append(help.length()).append(")");
         }
 
+        if (depends != null) {
+            result.append(" (depends: ").append(depends).append(")");
+        }
+        
         result.append("]");
 
         return result.toString();
