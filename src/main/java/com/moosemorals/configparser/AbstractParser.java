@@ -48,8 +48,7 @@ public abstract class AbstractParser {
     public AbstractParser(Environment e) {
         this.environment = e;
     }
-    
-    public abstract Entry parse(SourceFile t) throws IOException;
+        
 
     /**
      * Skip to the end of the line (or file) leaving the EOL/EOF on

@@ -39,7 +39,6 @@ public class ConfigParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
-
     public ConfigParser(Environment e) {
         super(e);
     }
@@ -113,7 +112,7 @@ public class ConfigParser extends AbstractParser {
                             break;
 
                         default:
-                            log.debug("skipping {}", skip(t));
+                            log.debug("config skipping {}", skip(t));
                             //skip(t);
                             break;
                     }
@@ -121,8 +120,8 @@ public class ConfigParser extends AbstractParser {
             }
         }
     }
-    
-       protected void readRange(SourceFile t, Config conf) throws IOException {
+
+    protected void readRange(SourceFile t, Config conf) throws IOException {
         t.nextToken();
         String value1 = t.getTokenString();
         t.nextToken();
@@ -144,8 +143,7 @@ public class ConfigParser extends AbstractParser {
         }
         conf.addSelect(new Select(select, c));
     }
-    
-    
+
     protected void readImply(SourceFile t, Config conf) throws IOException {
         String imply = readExpression(t);
         int token = t.nextToken();

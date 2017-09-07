@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser;
 
 import java.util.LinkedList;
@@ -36,20 +35,32 @@ import org.slf4j.LoggerFactory;
 public class Menu extends Entry {
 
     private final Logger log = LoggerFactory.getLogger(Menu.class);
-    
+
     private final List<Entry> entries;
-        
+
     public Menu(String symbol) {
-        super(symbol);        
-        this.entries = new LinkedList<>();        
+        super(symbol);
+        this.entries = new LinkedList<>();
     }
-    
-    public void addEntry(Config e) {
+
+    public void addEntry(Entry e) {
         entries.add(e);
     }
-    
+
     public List<Entry> getEntries() {
         return entries;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+
+        result.append("[menu: ").append(prompt);
+
+        result.append(entries.size()).append(entries.size() == 1 ? " entry" : " entries");
+
+        result.append("]");
+        return result.toString();
     }
 
 }

@@ -49,7 +49,7 @@ public class Main {
         
         File topLevel = new File(SOURCE_FOLDER, "Kconfig");
         
-        new FileParser(environment).parse(topLevel);
+        Menu top = new MenuParser(environment).parse(topLevel);
         
     }
 

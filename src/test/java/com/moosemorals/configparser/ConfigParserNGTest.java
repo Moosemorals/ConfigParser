@@ -38,7 +38,7 @@ public class ConfigParserNGTest {
     @Test
     public void test_replaceSymbolKnown() {
         
-        FileParser p = new FileParser(null);
+        MenuParser p = new MenuParser(null);
         Config e = new Config("TEST");
         e.setValue("Works");
         p.addEntry(e);

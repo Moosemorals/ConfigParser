@@ -40,22 +40,20 @@ public class ChoiceParser extends AbstractParser {
         super(e);
     }
 
-    @Override
+    
     public Choice parse(SourceFile t) throws IOException {
 
         Choice c;
         if (!"choice".equals(t.getTokenString())) {
             throw new ParseError(t, "Must be called on choice");
         }
-
-        log.debug("Looking for symbol");
+        
         String symbol = null;
         if (t.nextToken() == StreamTokenizer.TT_WORD) {
             symbol = t.getTokenString();
         } else {
             t.pushBack();
         }
-        log.debug("Symbol {}", symbol);
 
         c = new Choice(symbol);
 
