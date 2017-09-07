@@ -21,17 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.moosemorals.configparser;
 
-import com.moosemorals.configparser.values.Select;
-import com.moosemorals.configparser.values.Prompt;
-import com.moosemorals.configparser.values.Range;
 import com.moosemorals.configparser.values.Default;
-import com.moosemorals.configparser.values.Imply;
+import com.moosemorals.configparser.values.Prompt;
 import java.util.LinkedList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,26 +35,17 @@ import org.slf4j.LoggerFactory;
  */
 public class Entry {
 
-    private static final Logger log = LoggerFactory.getLogger(Entry.class);
+    protected final String symbol;
+    protected final List<Default> defaults;
+    protected final List<Condition> depends;
+    protected String type;
+    protected String value;
+    protected Prompt prompt;
+    protected String help;
 
-    private final String symbol;
-    private final List<Default> defaults;
-    private final List<Select> selects;
-    private final List<Imply> implies;
-    private final List<Range> ranges;
-    private final List<Condition> depends;
-    private String type;
-    private String value;
-    private Prompt prompt;
-    private String help;
-    
-
-    Entry(String symbol) {
+    public Entry(String symbol) {
         this.symbol = symbol;
         this.defaults = new LinkedList<>();
-        this.selects = new LinkedList<>();
-        this.implies = new LinkedList<>();
-        this.ranges = new LinkedList<>();
         this.depends = new LinkedList<>();
     }
 
@@ -118,52 +105,21 @@ public class Entry {
         return defaults;
     }
 
-    public void addSelect(Select select) {
-        selects.add(select);
-    }
-
-    public List<Select> getSelects() {
-        return selects;
-    }
-
-    public void addImplies(Imply select) {
-        implies.add(select);
-    }
-
-    public List<Imply> getImplies() {
-        return implies;
-    }
-    
-    public void addRange(Range range) {
-        ranges.add(range);
-    }
-    
-    public List<Range> getRanges() {
-        return ranges;
-    }
-
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder()
-                .append("[")
-                .append(symbol);
-
+        StringBuilder result = new StringBuilder().append("[").append(symbol);
         if (type != null) {
             result.append("(").append(type).append(")");
         }
-
         if (value != null) {
             result.append("=").append(value);
         }
-
         if (prompt != null) {
             result.append(" '").append(prompt).append("'");
         }
-
         if (help != null) {
             result.append(" (help: ").append(help.length()).append(")");
         }
-
         if (!depends.isEmpty()) {
             result.append(" dep: ");
             for (int i = 0; i < depends.size(); i += 1) {
@@ -173,7 +129,6 @@ public class Entry {
                 result.append(depends.get(i));
             }
         }
-        
         if (!defaults.isEmpty()) {
             result.append(" def: ");
             for (int i = 0; i < defaults.size(); i += 1) {
@@ -184,21 +139,8 @@ public class Entry {
             }
         }
 
-        if (!ranges.isEmpty()) {
-            result.append(" range: ");
-            for (int i = 0; i < ranges.size(); i += 1) {
-                if (i != 0) {
-                    result.append(", ");
-                }
-                result.append(ranges.get(i));
-            }
-        }
-        
-        
         result.append("]");
-
         return result.toString();
-
     }
 
 }

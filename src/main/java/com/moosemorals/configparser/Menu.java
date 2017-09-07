@@ -21,31 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.moosemorals.configparser;
 
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.Test;
+import java.util.LinkedList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ConfigParserNGTest {
+public class Menu extends Entry {
+
+    private final Logger log = LoggerFactory.getLogger(Menu.class);
     
-    public ConfigParserNGTest() {
+    private final List<Entry> entries;
+        
+    public Menu(String symbol) {
+        super(symbol);        
+        this.entries = new LinkedList<>();        
+    }
+    
+    public void addEntry(Config e) {
+        entries.add(e);
+    }
+    
+    public List<Entry> getEntries() {
+        return entries;
     }
 
-    @Test
-    public void test_replaceSymbolKnown() {
-        
-        FileParser p = new FileParser(null);
-        Config e = new Config("TEST");
-        e.setValue("Works");
-        p.addEntry(e);
-        
-        String result = p.replaceSymbols("$TEST");
-        
-        assertEquals(result, "Works");                            
-    }
-    
 }

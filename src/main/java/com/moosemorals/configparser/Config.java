@@ -23,29 +23,60 @@
  */
 package com.moosemorals.configparser;
 
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.Test;
+import com.moosemorals.configparser.values.Select;
+import com.moosemorals.configparser.values.Prompt;
+import com.moosemorals.configparser.values.Range;
+import com.moosemorals.configparser.values.Default;
+import com.moosemorals.configparser.values.Imply;
+import java.util.LinkedList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ConfigParserNGTest {
+public class Config extends Entry {
+
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
+
+    private final List<Select> selects;
+    private final List<Imply> implies;
+    private final List<Range> ranges;
     
-    public ConfigParserNGTest() {
+
+    Config(String symbol) {
+        super(symbol);        
+        this.selects = new LinkedList<>();
+        this.implies = new LinkedList<>();
+        this.ranges = new LinkedList<>();        
     }
 
-    @Test
-    public void test_replaceSymbolKnown() {
-        
-        FileParser p = new FileParser(null);
-        Config e = new Config("TEST");
-        e.setValue("Works");
-        p.addEntry(e);
-        
-        String result = p.replaceSymbols("$TEST");
-        
-        assertEquals(result, "Works");                            
+
+    public void addSelect(Select select) {
+        selects.add(select);
+    }
+
+    public List<Select> getSelects() {
+        return selects;
+    }
+
+    public void addImplies(Imply select) {
+        implies.add(select);
+    }
+
+    public List<Imply> getImplies() {
+        return implies;
     }
     
+    public void addRange(Range range) {
+        ranges.add(range);
+    }
+    
+    public List<Range> getRanges() {
+        return ranges;
+    }
+
+
 }

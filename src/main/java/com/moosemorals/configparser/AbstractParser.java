@@ -48,6 +48,8 @@ public abstract class AbstractParser {
     public AbstractParser(Environment e) {
         this.environment = e;
     }
+    
+    public abstract Entry parse(SourceFile t) throws IOException;
 
     /**
      * Skip to the end of the line (or file) leaving the EOL/EOF on
@@ -196,16 +198,6 @@ public abstract class AbstractParser {
         return;
     }
 
-    protected void readImply(SourceFile t, Entry e) throws IOException {
-        String imply = readExpression(t);
-        int token = t.nextToken();
-        Condition c = null;
-        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
-        }
-        e.addImplies(new Imply(imply, c));
-    }
-
     protected void readOption(SourceFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token != StreamTokenizer.TT_WORD) {
@@ -247,28 +239,7 @@ public abstract class AbstractParser {
         }
     }
 
-    protected void readRange(SourceFile t, Entry e) throws IOException {
-        t.nextToken();
-        String value1 = t.getTokenString();
-        t.nextToken();
-        String value2 = t.getTokenString();
-        Condition c = null;
-        int token = t.nextToken();
-        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
-        }
-        e.addRange(new Range(value1, value2, c));
-    }
-
-    protected void readSelect(SourceFile t, Entry e) throws IOException {
-        String select = readExpression(t);
-        int token = t.nextToken();
-        Condition c = null;
-        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
-        }
-        e.addSelect(new Select(select, c));
-    }
+ 
 
     protected void readType(SourceFile t, Entry e) throws IOException {
         e.setType(t.getTokenString());

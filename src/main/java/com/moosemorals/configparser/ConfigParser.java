@@ -23,157 +23,137 @@
  */
 package com.moosemorals.configparser;
 
-import java.io.File;
+import com.moosemorals.configparser.values.Imply;
+import com.moosemorals.configparser.values.Range;
+import com.moosemorals.configparser.values.Select;
 import java.io.IOException;
 import java.io.StreamTokenizer;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ * @author Osric Wilkinson (osric@fluffypeople.com)
+ */
 public class ConfigParser extends AbstractParser {
 
-    public static final Logger log = LoggerFactory.getLogger(ConfigParser.class);
+    private final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
 
-    private final Deque<SourceFile> fileStack;
-    private final LinkedList<Condition> ifStack;    
-    private final Map<String, Entry> entries;
-
-    public ConfigParser(Environment environment) {
-        super(environment);
-        this.entries = new HashMap<>();
-        fileStack = new LinkedList<>();
-        ifStack = new LinkedList<>();
+    public ConfigParser(Environment e) {
+        super(e);
     }
 
-    String replaceSymbols(String original) {
-        Pattern p = Pattern.compile("\\$([A-Za-z_]+)");
-        Matcher m = p.matcher(original);
-        StringBuffer sb = new StringBuffer();
-        while (m.find()) {
-            String symbol = m.group(1);
-            if (entries.containsKey(symbol)) {
-                Entry e = entries.get(symbol);
-                if (e.hasValue()) {
-                    m.appendReplacement(sb, e.getValue());
-                }
-            }
-        }
-        m.appendTail(sb);
-        return sb.toString();
-    }
+    public Config parse(SourceFile t) throws IOException {
 
-    void addEntry(Entry e) {
-        entries.put(e.getSymbol(), e);
-    }
-
-    private SourceFile source(File target) throws IOException {
-
-        SourceFile t = new SourceFile(target);
-        fileStack.push(t);
-        log.debug("Source: {} Changing to {}", getDepth(), t);
-        return t;
-    }
-
-    private SourceFile source(SourceFile t) throws IOException {
-        String target;
-        int token = t.nextToken();
-        if (token == QUOTE_CHAR) {
-            target = replaceSymbols(t.getTokenString());
-        } else {
-            StringBuilder result = new StringBuilder();
-            OUTER: while (true) {
-                switch (token) {
-                    case StreamTokenizer.TT_EOL:
-                        target = result.toString();
-                        t.pushBack();
-                        break OUTER;
-                    case StreamTokenizer.TT_WORD:
-                        result.append(t.getTokenString());
-                        break;
-                    default:
-                        result.appendCodePoint(token);
-                        break;
-                }
-                token = t.nextToken();
-            }
+        Config e;
+        if (!("config".equals(t.getTokenString()) || "menuconfig".equals(t.getTokenString()))) {
+            throw new ParseError(t, "Must be called on config");
         }
 
-        skip(t);
+        if (t.nextToken() != StreamTokenizer.TT_WORD) {
+            throw new ParseError(t, "Expecting word to follow 'config'");
+        }
 
-        log.debug("Opening {} from {}:{}", target, t.getPath(), t.getLineNumber());
-        return source(new File(Main.SOURCE_FOLDER, target));
-    }
+        e = new Config(t.getTokenString());
 
-    private int getDepth() {
-        return ((LinkedList) fileStack).size();
-    }
-
-    public void parse(File target) throws IOException {
-
-        SourceFile t = source(target);
-
-        int token;
-        OUTER:
         while (true) {
-            token = t.nextToken();
+            int token = t.nextToken();
+
             switch (token) {
                 case StreamTokenizer.TT_EOF:
-                    fileStack.pop();
-                    if (fileStack.isEmpty()) {
-                        log.debug("Completed parse");
-                        break OUTER;
-                    } else {                        
-                        t = fileStack.peek();
-                        log.debug("Back to {}", t.getPath());
-                    }
-                    break;
-
-                case COMMENT_CHAR:
-                    skip(t);
-                    break;
-                case StreamTokenizer.TT_EOL:
-                    // ignored
-                    break;
+                    t.pushBack();
+                    return e;
                 case StreamTokenizer.TT_WORD:
                     switch (t.getTokenString()) {
                         case "config":
                         case "menuconfig":
                         case "choice":
-                            log.debug("Starting entry");
-                            Entry e = new EntryParser(environment).parse(t);
-                            if (!ifStack.isEmpty()) {                                
-                                ifStack.forEach(e::addDepends);
-                            }
-                            log.debug("Entry complete {}", e);
-                            addEntry(e);
-                            break;
-                        case "source":
-                            t = source(t);
-                            break;
+                        case "endchoice":
+                        case "comment":
+                        case "menu":
+                        case "endmenu":
                         case "if":
-                            ifStack.push(new Condition(readExpression(t)));
-                            break;
                         case "endif":
-                            ifStack.pop();
+                        case "source":
+                            t.pushBack();
+                            return e;
+                        case "string":
+                        case "bool":
+                        case "tristate":
+                        case "int":
+                        case "hex":
+                            readType(t, e);
                             break;
+                        case "def_bool":
+                        case "def_tristate":
+                            readTypeWithDef(t, e);
+                            break;
+                        case "default":
+                            readDefault(t, e);
+                            break;
+                        case "depends":
+                            readDepends(t, e);
+                            break;
+                        case "implies":
+                            readImply(t, e);
+                            break;
+                        case "help":
+                        case "---help---":
+                            readHelp(t, e);
+                            break;
+                        case "option":
+                            readOption(t, e);
+                            break;
+                        case "range":
+                            readRange(t, e);
+                            break;
+                        case "select":
+                            readSelect(t, e);
+                            break;
+
                         default:
-                            skip(t);
+                            log.debug("skipping {}", skip(t));
+                            //skip(t);
                             break;
                     }
-
                     break;
-                default:
-
-                    break;
-
             }
         }
+    }
+    
+       protected void readRange(SourceFile t, Config conf) throws IOException {
+        t.nextToken();
+        String value1 = t.getTokenString();
+        t.nextToken();
+        String value2 = t.getTokenString();
+        Condition c = null;
+        int token = t.nextToken();
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        conf.addRange(new Range(value1, value2, c));
+    }
+
+    protected void readSelect(SourceFile t, Config conf) throws IOException {
+        String select = readExpression(t);
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        conf.addSelect(new Select(select, c));
+    }
+    
+    
+    protected void readImply(SourceFile t, Config conf) throws IOException {
+        String imply = readExpression(t);
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        conf.addImplies(new Imply(imply, c));
     }
 
 }

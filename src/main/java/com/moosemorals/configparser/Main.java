@@ -49,7 +49,7 @@ public class Main {
         
         File topLevel = new File(SOURCE_FOLDER, "Kconfig");
         
-        new ConfigParser(environment).parse(topLevel);
+        new FileParser(environment).parse(topLevel);
         
     }
 

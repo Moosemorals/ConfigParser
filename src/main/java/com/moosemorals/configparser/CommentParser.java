@@ -23,11 +23,6 @@
  */
 package com.moosemorals.configparser;
 
-import com.moosemorals.configparser.values.Select;
-import com.moosemorals.configparser.values.Range;
-import com.moosemorals.configparser.values.Prompt;
-import com.moosemorals.configparser.values.Default;
-import com.moosemorals.configparser.values.Imply;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import org.slf4j.Logger;
@@ -37,39 +32,29 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class EntryParser extends AbstractParser {
+public class CommentParser extends AbstractParser {
 
-    private final Logger log = LoggerFactory.getLogger(EntryParser.class);
+    private final Logger log = LoggerFactory.getLogger(CommentParser.class);
 
-
-    public EntryParser(Environment e) {
+    public CommentParser(Environment e) {
         super(e);
     }
 
-    private boolean isStartWord(String word) {
-        return word.equals("config") || word.equals("menuconfig") || word.equals("choice") || word.equals("menu");
-    }
-
-    public Entry parse(SourceFile t) throws IOException {
-
-        Entry e;
-        if (!isStartWord(t.getTokenString())) {
-            throw new ParseError(t, "Must be called on start word");
+    public Comment parse(SourceFile t) throws IOException {                        
+        if (!"comment".equals(t.getTokenString())) {
+            throw new ParseError(t, "Must be called on comment");
         }
+        
+        Comment c = new Comment(null);
 
-        if (t.nextToken() != StreamTokenizer.TT_WORD) {
-            throw new ParseError(t, "Expecting word to follow 'config'");
-        }
-
-        e = new Entry(t.getTokenString());
+        readPrompt(t, c);
 
         while (true) {
-            int token = t.nextToken();
-
+            int token = t.nextToken();            
             switch (token) {
                 case StreamTokenizer.TT_EOF:
                     t.pushBack();
-                    return e;
+                    return c;
                 case StreamTokenizer.TT_WORD:
                     switch (t.getTokenString()) {
                         case "config":
@@ -81,43 +66,13 @@ public class EntryParser extends AbstractParser {
                         case "endmenu":
                         case "if":
                         case "endif":
-                        case "source":
+                        case "source":                        
                             t.pushBack();
-                            return e;
-                        case "string":
-                        case "bool":
-                        case "tristate":
-                        case "int":
-                        case "hex":
-                            readType(t, e);
-                            break;
-                        case "def_bool":
-                        case "def_tristate":
-                            readTypeWithDef(t, e);
-                            break;
-                        case "default":
-                            readDefault(t, e);
-                            break;
+                            return c;
                         case "depends":
-                            readDepends(t, e);
+                            readDepends(t, c);
                             break;
-                        case "implies":
-                            readImply(t, e);
-                            break;
-                        case "help":
-                        case "---help---":
-                            readHelp(t, e);
-                            break;
-                        case "option":
-                            readOption(t, e);
-                            break;
-                        case "range":
-                            readRange(t, e);
-                            break;
-                        case "select":
-                            readSelect(t, e);
-                            break;
-
+                        
                         default:
                             log.debug("skipping {}", skip(t));
                             //skip(t);
@@ -127,4 +82,5 @@ public class EntryParser extends AbstractParser {
             }
         }
     }
+
 }
