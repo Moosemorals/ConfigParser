@@ -23,6 +23,11 @@
  */
 package com.moosemorals.configparser;
 
+import com.moosemorals.configparser.values.Select;
+import com.moosemorals.configparser.values.Range;
+import com.moosemorals.configparser.values.Prompt;
+import com.moosemorals.configparser.values.Default;
+import com.moosemorals.configparser.values.Imply;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import org.slf4j.Logger;
@@ -46,7 +51,7 @@ public class EntryParser extends AbstractParser {
         return word.equals("config") || word.equals("menuconfig") || word.equals("choice") || word.equals("menu");
     }
 
-    public Entry parse(KconfigFile t) throws IOException {
+    public Entry parse(SourceFile t) throws IOException {
 
         Entry e;
         if (!isStartWord(t.getTokenString())) {
@@ -124,7 +129,7 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readPrompt(KconfigFile t, Entry e) throws IOException {
+    private void readPrompt(SourceFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token == QUOTE_CHAR) {
             String prompt = t.getTokenString();
@@ -139,7 +144,7 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readType(KconfigFile t, Entry e) throws IOException {
+    private void readType(SourceFile t, Entry e) throws IOException {
         e.setType(t.getTokenString());
         int token = t.nextToken();
         if (token == QUOTE_CHAR) {
@@ -148,7 +153,7 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readOption(KconfigFile t, Entry e) throws IOException {
+    private void readOption(SourceFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token != StreamTokenizer.TT_WORD) {
             throw new ParseError(t, "Option without word");
@@ -179,7 +184,7 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readHelp(KconfigFile t, Entry e) throws IOException {
+    private void readHelp(SourceFile t, Entry e) throws IOException {
         if (t.currentToken() != StreamTokenizer.TT_EOL) {
             skip(t);
         }
@@ -232,7 +237,7 @@ public class EntryParser extends AbstractParser {
         return;
     }
 
-    private void readDepends(KconfigFile t, Entry e) throws IOException {
+    private void readDepends(SourceFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token != StreamTokenizer.TT_WORD || !t.getTokenString().equals("on")) {
             throw new ParseError(t, "'on' must follow depends");
@@ -241,7 +246,7 @@ public class EntryParser extends AbstractParser {
         e.addDepends(readExpression(t));
     }
 
-    private void readDefault(KconfigFile t, Entry e) throws IOException {
+    private void readDefault(SourceFile t, Entry e) throws IOException {
         String def = readExpression(t);
 
         int token = t.nextToken();
@@ -253,7 +258,7 @@ public class EntryParser extends AbstractParser {
         e.addDefault(new Default(def, c));
     }
 
-    private void readSelect(KconfigFile t, Entry e) throws IOException {
+    private void readSelect(SourceFile t, Entry e) throws IOException {
         String select = readExpression(t);
 
         int token = t.nextToken();
@@ -265,7 +270,7 @@ public class EntryParser extends AbstractParser {
         e.addSelect(new Select(select, c));
     }
 
-    private void readImply(KconfigFile t, Entry e) throws IOException {
+    private void readImply(SourceFile t, Entry e) throws IOException {
         String imply = readExpression(t);
 
         int token = t.nextToken();
@@ -277,7 +282,7 @@ public class EntryParser extends AbstractParser {
         e.addImplies(new Imply(imply, c));
     }
 
-    private void readRange(KconfigFile t, Entry e) throws IOException {
+    private void readRange(SourceFile t, Entry e) throws IOException {
         t.nextToken();
         String value1 = t.getTokenString();
         t.nextToken();
@@ -292,7 +297,7 @@ public class EntryParser extends AbstractParser {
         e.addRange(new Range(value1, value2, c));
     }
 
-    private void readTypeWithDef(KconfigFile t, Entry e) throws IOException {
+    private void readTypeWithDef(SourceFile t, Entry e) throws IOException {
         String type = t.getTokenString();
 
         e.setType(type.substring("dev_".length()));

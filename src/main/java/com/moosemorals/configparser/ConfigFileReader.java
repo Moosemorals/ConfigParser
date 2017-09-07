@@ -33,13 +33,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ConfigReader extends Reader {
+public class ConfigFileReader extends Reader {
 
-    private final Logger log = LoggerFactory.getLogger(ConfigReader.class);
+    private final Logger log = LoggerFactory.getLogger(ConfigFileReader.class);
 
     private final PushbackReader in;
 
-    public ConfigReader(PushbackReader in) {
+    public ConfigFileReader(PushbackReader in) {
         super();
         this.in = in;
     }

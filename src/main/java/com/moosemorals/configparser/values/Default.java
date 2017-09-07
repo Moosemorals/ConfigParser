@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.values;
 
+import com.moosemorals.configparser.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +32,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Prompt extends ConditionalValue {
+public class Default extends ConditionalValue {
 
-    private final Logger log = LoggerFactory.getLogger(Prompt.class);
+    private final Logger log = LoggerFactory.getLogger(Default.class);
 
-    public Prompt(String value, Condition condition) {
+    public Default(String value, Condition condition) {
         super(value, condition);
     }
-
+ 
+    
 }

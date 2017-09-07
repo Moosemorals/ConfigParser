@@ -46,7 +46,7 @@ public abstract class AbstractParser {
      * @return String skipped text
      * @throws IOException 
      */
-    protected String skip(KconfigFile t) throws IOException {
+    protected String skip(SourceFile t) throws IOException {
         StringBuilder skipped = new StringBuilder();
         while (true) {
             int token = t.nextToken();
@@ -63,7 +63,7 @@ public abstract class AbstractParser {
         }
     }
 
-    protected String readExpression(KconfigFile t) throws IOException {
+    protected String readExpression(SourceFile t) throws IOException {
         StringBuilder result = new StringBuilder();
 
         String symbol;

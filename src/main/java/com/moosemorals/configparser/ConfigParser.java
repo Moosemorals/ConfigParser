@@ -40,7 +40,7 @@ public class ConfigParser extends AbstractParser {
     public static final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
 
-    private final Deque<KconfigFile> fileStack;
+    private final Deque<SourceFile> fileStack;
     private final Environment environment;
     private final Map<String, Entry> entries;
 
@@ -71,15 +71,15 @@ public class ConfigParser extends AbstractParser {
         entries.put(e.getSymbol(), e);
     }
 
-    private KconfigFile source(File target) throws IOException {
+    private SourceFile source(File target) throws IOException {
 
-        KconfigFile t = new KconfigFile(target);
+        SourceFile t = new SourceFile(target);
         fileStack.push(t);
         log.debug("Source: {} Changing to {}", getDepth(), t);
         return t;
     }
 
-    private KconfigFile source(KconfigFile t) throws IOException {
+    private SourceFile source(SourceFile t) throws IOException {
         String target;
         int token = t.nextToken();
         if (token == QUOTE_CHAR) {
@@ -115,7 +115,7 @@ public class ConfigParser extends AbstractParser {
 
     public void parse(File target) throws IOException {
 
-        KconfigFile t = source(target);
+        SourceFile t = source(target);
 
         int token;
         OUTER:

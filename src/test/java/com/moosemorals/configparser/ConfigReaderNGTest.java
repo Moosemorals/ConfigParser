@@ -42,7 +42,7 @@ public class ConfigReaderNGTest {
     @Test
     public void test_basicRead() throws IOException {
         String test = "Hello, world";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         for (int i = 0; i < test.length(); i += 1) {
             assertEquals(in.read(), test.charAt(i));
@@ -53,7 +53,7 @@ public class ConfigReaderNGTest {
     @Test
     public void test_ReadNewline() throws IOException {
         String test = "\n";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         assertEquals(in.read(), '\n');
     }
@@ -61,7 +61,7 @@ public class ConfigReaderNGTest {
     @Test
     public void test_ReadArray() throws IOException {
         String test = "Hello, world";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         char[] result = new char[test.length()];
         int read = in.read(result, 0, test.length());
@@ -73,7 +73,7 @@ public class ConfigReaderNGTest {
     @Test
     public void test_ReadArrayLong() throws IOException {
         String test = "Hello, world";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         char[] result = new char[test.length() + 4];
         int read = in.read(result, 0, result.length);
@@ -93,7 +93,7 @@ public class ConfigReaderNGTest {
         String before = "Hello ";
         String after = "# world";
         String test = before + after;
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         char[] result = new char[before.length()];
         int read = in.read(result, 0, result.length);
@@ -108,7 +108,7 @@ public class ConfigReaderNGTest {
     public void test_ReadCommentAndNewline() throws IOException {
         String test = "a#b\nc";
         String expected = "a\nc";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         char[] result = new char[test.length()];
         int read = in.read(result, 0, result.length);
@@ -123,7 +123,7 @@ public class ConfigReaderNGTest {
     public void test_Continuation() throws IOException {
         String test = "a\\\nb";
         String expected = "ab";
-        ConfigReader in = new ConfigReader(new PushbackReader(new StringReader(test)));
+        ConfigFileReader in = new ConfigFileReader(new PushbackReader(new StringReader(test)));
 
         char[] result = new char[test.length()];
         int read = in.read(result, 0, result.length);

@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.values;
 
+import com.moosemorals.configparser.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +32,30 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Default extends ConditionalValue {
+public class Range extends ConditionalValue {
 
-    private final Logger log = LoggerFactory.getLogger(Default.class);
+    private final Logger log = LoggerFactory.getLogger(Range.class);
 
-    public Default(String value, Condition condition) {
-        super(value, condition);
-    }
- 
+    private final String value2;
     
+    public Range(String value1, String value2,  Condition condition) {
+        super(value1, condition);
+        this.value2 = value2;
+    }
+    
+    public String getValue2() {
+        return value2;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("[").append(value).append(" to ").append(value2);
+        if (condition != null) {
+            result.append(" if ").append(condition.toString());
+        }        
+        result.append("]");
+        return result.toString();
+    }
+
 }

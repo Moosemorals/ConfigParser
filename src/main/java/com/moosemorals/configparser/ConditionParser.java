@@ -37,7 +37,7 @@ public class ConditionParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ConditionParser.class);
     
-    Condition parse(KconfigFile t) throws IOException {
+    Condition parse(SourceFile t) throws IOException {
         if (t.currentToken() != StreamTokenizer.TT_WORD && !t.getTokenString().equals("if")) {
             throw new ParseError(t, "Must start parsing condition on an 'if'");
         }

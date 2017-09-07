@@ -23,6 +23,11 @@
  */
 package com.moosemorals.configparser;
 
+import com.moosemorals.configparser.values.Select;
+import com.moosemorals.configparser.values.Prompt;
+import com.moosemorals.configparser.values.Range;
+import com.moosemorals.configparser.values.Default;
+import com.moosemorals.configparser.values.Imply;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;

@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
 
+package com.moosemorals.configparser.values;
+
+import com.moosemorals.configparser.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,35 +32,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public abstract class ConditionalValue {
+public class Select extends ConditionalValue {
 
-    private final Logger log = LoggerFactory.getLogger(ConditionalValue.class);
+    private final Logger log = LoggerFactory.getLogger(Select.class);
 
-    protected final String value;
-    protected final Condition condition;
-
-    public ConditionalValue(String value, Condition condition) {
-        this.value = value;
-        this.condition = condition;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public boolean evaluate() {
-        return condition.evaluate();
+    public Select(String value, Condition condition) {
+        super(value, condition);
     }
     
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("[").append(value);
-        if (condition != null) {
-            result.append(" if ").append(condition.toString());
-        }        
-        result.append("]");
-        return result.toString();
-    }
-
 }

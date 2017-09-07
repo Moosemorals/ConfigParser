@@ -33,19 +33,19 @@ import java.io.StreamTokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class KconfigFile {
+public final class SourceFile {
 
-    private final Logger log = LoggerFactory.getLogger(KconfigFile.class);
+    private final Logger log = LoggerFactory.getLogger(SourceFile.class);
     private final static int PUSHBACK_BUFFER_SIZE = 8 * 1024; // Probably overkill.
     private final StreamTokenizer t;
-    private final ConfigReader in;
+    private final ConfigFileReader in;
     private final File target;
     private int lines = 0;
 
-    public KconfigFile(File target) throws IOException {
+    public SourceFile(File target) throws IOException {
         this.target = target;
         try {
-            in = new ConfigReader(new PushbackReader(new FileReader(target), PUSHBACK_BUFFER_SIZE));
+            in = new ConfigFileReader(new PushbackReader(new FileReader(target), PUSHBACK_BUFFER_SIZE));
         } catch (FileNotFoundException ex) {
             throw new ParseError(this, "Can't find target");
         }
