@@ -24,33 +24,19 @@
 
 package com.moosemorals.configparser;
 
-import java.io.File;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Main {
+public class Imply extends ConditionalValue {
 
-    public static final File SOURCE_FOLDER = new File("/home/osric/src/linux-4.13/");
-    
-    public static final Logger log = LoggerFactory.getLogger(Main.class);
+    private final Logger log = LoggerFactory.getLogger(Imply.class);
 
-    public static void main(String[] args) throws IOException {
-        
-        Environment environment = new Environment();
-        environment.put("SRCARCH", "x86");
-        environment.put("ARCH", "x86");
-        environment.put("KERNELVERSION", "4.13");
-        
-        File topLevel = new File(SOURCE_FOLDER, "Kconfig");
-        
-        new ConfigParser(environment).parse(topLevel);
-        
+    public Imply(String value, Condition condition) {
+        super(value, condition);
     }
 
 }

@@ -91,22 +91,29 @@ public class EntryParser extends AbstractParser {
                         case "def_tristate":
                             readTypeWithDef(t, e);
                             break;
-                        case "option":
-                            readOption(t, e);
-                            break;
-                        case "help":
-                        case "---help---":
-                            readHelp(t, e);
-                            break;
                         case "default":
                             readDefault(t, e);
                             break;
                         case "depends":
                             readDepends(t, e);
                             break;
+                        case "implies":
+                            readImply(t, e);
+                            break;
+                        case "help":
+                        case "---help---":
+                            readHelp(t, e);
+                            break;
+                        case "option":
+                            readOption(t, e);
+                            break;
+                        case "range":
+                            readRange(t, e);
+                            break;
                         case "select":
                             readSelect(t, e);
                             break;
+
                         default:
                             log.debug("skipping {}", skip(t));
                             //skip(t);
@@ -117,7 +124,7 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readPrompt(KconfigFile t, Entry e) throws IOException {        
+    private void readPrompt(KconfigFile t, Entry e) throws IOException {
         int token = t.nextToken();
         if (token == QUOTE_CHAR) {
             String prompt = t.getTokenString();
@@ -129,10 +136,10 @@ public class EntryParser extends AbstractParser {
             }
 
             e.setPrompt(new Prompt(prompt, c));
-        }        
+        }
     }
 
-    private void readType(KconfigFile t, Entry e) throws IOException {        
+    private void readType(KconfigFile t, Entry e) throws IOException {
         e.setType(t.getTokenString());
         int token = t.nextToken();
         if (token == QUOTE_CHAR) {
@@ -258,11 +265,38 @@ public class EntryParser extends AbstractParser {
         e.addSelect(new Select(select, c));
     }
 
+    private void readImply(KconfigFile t, Entry e) throws IOException {
+        String imply = readExpression(t);
+
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser().parse(t);
+        }
+
+        e.addImplies(new Imply(imply, c));
+    }
+
+    private void readRange(KconfigFile t, Entry e) throws IOException {
+        t.nextToken();
+        String value1 = t.getTokenString();
+        t.nextToken();
+        String value2 = t.getTokenString();
+                
+        Condition c = null;
+        int token = t.nextToken();
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser().parse(t);
+        }
+
+        e.addRange(new Range(value1, value2, c));
+    }
+
     private void readTypeWithDef(KconfigFile t, Entry e) throws IOException {
         String type = t.getTokenString();
-        
+
         e.setType(type.substring("dev_".length()));
-        readDefault(t, e);        
+        readDefault(t, e);
     }
 
 }

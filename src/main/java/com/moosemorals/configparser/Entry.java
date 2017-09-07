@@ -39,7 +39,8 @@ public class Entry {
     private final String symbol;
     private final List<Default> defaults;
     private final List<Select> selects;
-    private final List<Implies> implies;
+    private final List<Imply> implies;
+    private final List<Range> ranges;
     private String type;
     private String value;
     private Prompt prompt;
@@ -51,6 +52,7 @@ public class Entry {
         this.defaults = new LinkedList<>();
         this.selects = new LinkedList<>();
         this.implies = new LinkedList<>();
+        this.ranges = new LinkedList<>();
     }
 
     public String getSymbol() {
@@ -121,12 +123,20 @@ public class Entry {
         return selects;
     }
 
-    public void addImplies(Implies select) {
+    public void addImplies(Imply select) {
         implies.add(select);
     }
 
-    public List<Implies> getImplies() {
+    public List<Imply> getImplies() {
         return implies;
+    }
+    
+    public void addRange(Range range) {
+        ranges.add(range);
+    }
+    
+    public List<Range> getRanges() {
+        return ranges;
     }
 
     @Override
@@ -154,7 +164,6 @@ public class Entry {
         if (depends != null) {
             result.append(" (depends: ").append(depends).append(")");
         }
-
         
         if (!defaults.isEmpty()) {
             result.append(" (def: ");
@@ -165,6 +174,18 @@ public class Entry {
                 result.append(defaults.get(i));
             }
         }
+
+        if (!ranges.isEmpty()) {
+            result.append(" (range: ");
+            for (int i = 0; i < ranges.size(); i += 1) {
+                if (i != 0) {
+                    result.append(", ");
+                }
+                result.append(ranges.get(i));
+            }
+        }
+        
+        
         result.append("]");
 
         return result.toString();
