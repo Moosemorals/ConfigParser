@@ -71,7 +71,6 @@ public class MenuParser extends AbstractParser {
 
         SourceFile t = new SourceFile(target);
         fileStack.push(t);
-        log.debug("Source: {} Changing to {}", getDepth(), t);
         return t;
     }
 
@@ -102,7 +101,7 @@ public class MenuParser extends AbstractParser {
 
         skip(t);
 
-        log.debug("Opening {} from {}:{}", target, t.getPath(), t.getLineNumber());
+        log.debug("Depth {}: Opening {} from {}:{}", getDepth(), target, t.getPath(), t.getLineNumber());
         return source(new File(Main.SOURCE_FOLDER, target));
     }
 
