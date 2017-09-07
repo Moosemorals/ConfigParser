@@ -46,11 +46,12 @@ public class Entry {
     private final List<Select> selects;
     private final List<Imply> implies;
     private final List<Range> ranges;
+    private final List<Condition> depends;
     private String type;
     private String value;
     private Prompt prompt;
     private String help;
-    private String depends;
+    
 
     Entry(String symbol) {
         this.symbol = symbol;
@@ -58,6 +59,7 @@ public class Entry {
         this.selects = new LinkedList<>();
         this.implies = new LinkedList<>();
         this.ranges = new LinkedList<>();
+        this.depends = new LinkedList<>();
     }
 
     public String getSymbol() {
@@ -100,16 +102,12 @@ public class Entry {
         this.help = help;
     }
 
-    public String getDepends() {
+    public List<Condition> getDepends() {
         return depends;
     }
 
-    public void addDepends(String depends) {
-        if (this.depends == null) {
-            this.depends = depends;
-        } else {
-            this.depends += " && " + depends;
-        }
+    public void addDepends(Condition condition) {
+        depends.add(condition);
     }
 
     public void addDefault(Default def) {
@@ -166,12 +164,18 @@ public class Entry {
             result.append(" (help: ").append(help.length()).append(")");
         }
 
-        if (depends != null) {
-            result.append(" (depends: ").append(depends).append(")");
+        if (!depends.isEmpty()) {
+            result.append(" dep: ");
+            for (int i = 0; i < depends.size(); i += 1) {
+                if (i != 0) {
+                    result.append(", ");
+                }
+                result.append(depends.get(i));
+            }
         }
         
         if (!defaults.isEmpty()) {
-            result.append(" (def: ");
+            result.append(" def: ");
             for (int i = 0; i < defaults.size(); i += 1) {
                 if (i != 0) {
                     result.append(", ");
@@ -181,7 +185,7 @@ public class Entry {
         }
 
         if (!ranges.isEmpty()) {
-            result.append(" (range: ");
+            result.append(" range: ");
             for (int i = 0; i < ranges.size(); i += 1) {
                 if (i != 0) {
                     result.append(", ");

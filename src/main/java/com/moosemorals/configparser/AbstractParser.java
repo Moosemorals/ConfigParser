@@ -23,6 +23,11 @@
  */
 package com.moosemorals.configparser;
 
+import com.moosemorals.configparser.values.Default;
+import com.moosemorals.configparser.values.Imply;
+import com.moosemorals.configparser.values.Prompt;
+import com.moosemorals.configparser.values.Range;
+import com.moosemorals.configparser.values.Select;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import org.slf4j.Logger;
@@ -38,6 +43,11 @@ public abstract class AbstractParser {
     public static final int QUOTE_CHAR = '"';
 
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
+    protected final Environment environment;
+    
+    public AbstractParser(Environment e) {
+        this.environment = e;
+    }
 
     /**
      * Skip to the end of the line (or file) leaving the EOL/EOF on
@@ -120,6 +130,159 @@ public abstract class AbstractParser {
                     return result.toString();
             }
         }
+    }
+
+    protected void readDefault(SourceFile t, Entry e) throws IOException {
+        String def = readExpression(t);
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        e.addDefault(new Default(def, c));
+    }
+
+    protected void readDepends(SourceFile t, Entry e) throws IOException {
+        int token = t.nextToken();
+        if (token != StreamTokenizer.TT_WORD || !t.getTokenString().equals("on")) {
+            throw new ParseError(t, "'on' must follow depends");
+        }
+        e.addDepends(new Condition(readExpression(t)));
+    }
+
+    protected void readHelp(SourceFile t, Entry e) throws IOException {
+        if (t.currentToken() != StreamTokenizer.TT_EOL) {
+            skip(t);
+        }
+        t.nextToken();
+        String line = t.readLine();
+        if (line == null) {
+            // EOF
+            return;
+        }
+        while (line.length() == 0) {
+            line = t.readLine();
+            if (line == null) {
+                // EOF
+                return;
+            }
+        }
+        line = line.replace("\t", "        ");
+        int indent = line.indexOf(line.trim());
+        if (indent == 0) {
+            // No help
+            return;
+        }
+        StringBuilder help = new StringBuilder();
+        help.append(line);
+        while ((line = t.readLine()) != null) {
+            int offset = 0;
+            if (line.length() > 0) {
+                line = line.replace("\t", "        ");
+                offset = line.indexOf(line.trim());
+            }
+            if (offset < indent) {
+                if (line.length() > 0) {
+                    t.unreadLine(line);
+                    break;
+                } else {
+                    help.append("\n");
+                }
+            } else {
+                help.append(line);
+            }
+        }
+        e.setHelp(help.toString());
+        return;
+    }
+
+    protected void readImply(SourceFile t, Entry e) throws IOException {
+        String imply = readExpression(t);
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        e.addImplies(new Imply(imply, c));
+    }
+
+    protected void readOption(SourceFile t, Entry e) throws IOException {
+        int token = t.nextToken();
+        if (token != StreamTokenizer.TT_WORD) {
+            throw new ParseError(t, "Option without word");
+        }
+        switch (t.getTokenString()) {
+            case "env":
+                token = t.nextToken();
+                if (token != '=') {
+                    throw new ParseError(t, "option env needs an '='");
+                }
+                token = t.nextToken();
+                if (token != QUOTE_CHAR) {
+                    throw new ParseError(t, "option env needs a quoted string");
+                }
+                String envName = t.getTokenString();
+                if (environment.contains(envName)) {
+                    e.setValue(environment.get(envName));
+                }
+                break;
+            default:
+                // ignore options
+                skip(t);
+                t.nextToken(); // throw away EOL
+                break;
+        }
+    }
+
+    protected void readPrompt(SourceFile t, Entry e) throws IOException {
+        int token = t.nextToken();
+        if (token == QUOTE_CHAR) {
+            String prompt = t.getTokenString();
+            token = t.nextToken();
+            Condition c = null;
+            if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+                c = new ConditionParser(environment).parse(t);
+            }
+            e.setPrompt(new Prompt(prompt, c));
+        }
+    }
+
+    protected void readRange(SourceFile t, Entry e) throws IOException {
+        t.nextToken();
+        String value1 = t.getTokenString();
+        t.nextToken();
+        String value2 = t.getTokenString();
+        Condition c = null;
+        int token = t.nextToken();
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        e.addRange(new Range(value1, value2, c));
+    }
+
+    protected void readSelect(SourceFile t, Entry e) throws IOException {
+        String select = readExpression(t);
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser(environment).parse(t);
+        }
+        e.addSelect(new Select(select, c));
+    }
+
+    protected void readType(SourceFile t, Entry e) throws IOException {
+        e.setType(t.getTokenString());
+        int token = t.nextToken();
+        if (token == QUOTE_CHAR) {
+            t.pushBack();
+            readPrompt(t, e);
+        }
+    }
+
+    protected void readTypeWithDef(SourceFile t, Entry e) throws IOException {
+        String type = t.getTokenString();
+        e.setType(type.substring("dev_".length()));
+        readDefault(t, e);
     }
 
 }

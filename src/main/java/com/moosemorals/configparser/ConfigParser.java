@@ -41,13 +41,14 @@ public class ConfigParser extends AbstractParser {
 
 
     private final Deque<SourceFile> fileStack;
-    private final Environment environment;
+    private final LinkedList<Condition> ifStack;    
     private final Map<String, Entry> entries;
 
     public ConfigParser(Environment environment) {
-        this.environment = environment;
+        super(environment);
         this.entries = new HashMap<>();
         fileStack = new LinkedList<>();
+        ifStack = new LinkedList<>();
     }
 
     String replaceSymbols(String original) {
@@ -143,8 +144,12 @@ public class ConfigParser extends AbstractParser {
                     switch (t.getTokenString()) {
                         case "config":
                         case "menuconfig":
+                        case "choice":
                             log.debug("Starting entry");
                             Entry e = new EntryParser(environment).parse(t);
+                            if (!ifStack.isEmpty()) {                                
+                                ifStack.forEach(e::addDepends);
+                            }
                             log.debug("Entry complete {}", e);
                             addEntry(e);
                             break;
@@ -152,7 +157,10 @@ public class ConfigParser extends AbstractParser {
                             t = source(t);
                             break;
                         case "if":
-                            skip(t);
+                            ifStack.push(new Condition(readExpression(t)));
+                            break;
+                        case "endif":
+                            ifStack.pop();
                             break;
                         default:
                             skip(t);
