@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser;
 
-import static com.moosemorals.configparser.ConfigParser.QUOTE_CHAR;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -39,23 +38,27 @@ public final class KconfigFile {
     private final Logger log = LoggerFactory.getLogger(KconfigFile.class);
     private final static int PUSHBACK_BUFFER_SIZE = 8 * 1024; // Probably overkill.
     private final StreamTokenizer t;
-    private final PushbackReader in;
+    private final ConfigReader in;
     private final File target;
     private int lines = 0;
-    
+
     public KconfigFile(File target) throws IOException {
         this.target = target;
-        in = new PushbackReader(new FileReader(target), PUSHBACK_BUFFER_SIZE);
+        try {
+            in = new ConfigReader(new PushbackReader(new FileReader(target), PUSHBACK_BUFFER_SIZE));
+        } catch (FileNotFoundException ex) {
+            throw new ParseError(this, "Can't find target");
+        }
         t = new StreamTokenizer(in);
         setupTokenizer();
     }
-    
+
     private void setupTokenizer() {
         t.resetSyntax();
         t.eolIsSignificant(true);
         t.slashSlashComments(false);
         t.slashStarComments(false);
-        t.quoteChar(QUOTE_CHAR);
+        t.quoteChar(AbstractParser.QUOTE_CHAR);
         t.wordChars('a', 'z');
         t.wordChars('A', 'Z');
         t.wordChars('0', '9');
@@ -63,35 +66,35 @@ public final class KconfigFile {
         t.wordChars('_', '_');
         t.whitespaceChars('\u0000', '\u0020');
     }
-        
+
     public int nextToken() throws IOException {
         return t.nextToken();
     }
-    
+
     public int currentToken() {
         return t.ttype;
     }
-    
+
     public String getTokenString() {
         return t.sval;
     }
-    
+
     public double tokenDouble() {
         return t.nval;
     }
-    
+
     public void pushBack() {
         t.pushBack();
     }
-    
+
     public String readLine() throws IOException {
         lines += 1;
-        
+
         StringBuilder line = new StringBuilder();
-        int c; 
+        int c;
         boolean inComment = false;
         while ((c = in.read()) != -1) {
-            if (c == ConfigParser.COMMENT_CHAR) {
+            if (c == AbstractParser.COMMENT_CHAR) {
                 inComment = true;
             } else if (c != '\n') {
                 if (!inComment) {
@@ -101,18 +104,18 @@ public final class KconfigFile {
                 break;
             }
         }
-        
+
         if (c == -1) {
             return null;
         }
-        
-        return line.toString();        
+
+        return line.toString();
     }
-    
-    public void unreadLine(String line) throws IOException {        
+
+    public void unreadLine(String line) throws IOException {
         lines -= 1;
         line = line + '\n';
-        in.unread(line.toCharArray());        
+        in.unread(line.toCharArray());
     }
 
     public String getPath() {
@@ -123,8 +126,12 @@ public final class KconfigFile {
     public String toString() {
         return "KconfigFile{" + "t=" + t + ", target=" + target + '}';
     }
-    
+
     public int getLineNumber() {
-        return t.lineno() + lines;
+        if (t != null) {
+            return t.lineno() + lines;
+        } else {
+            return 0;
+        }
     }
 }

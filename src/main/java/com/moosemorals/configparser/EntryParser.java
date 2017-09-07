@@ -87,6 +87,10 @@ public class EntryParser extends AbstractParser {
                         case "hex":
                             readType(t, e);
                             break;
+                        case "def_bool":
+                        case "def_tristate":
+                            readTypeWithDef(t, e);
+                            break;
                         case "option":
                             readOption(t, e);
                             break;
@@ -100,8 +104,12 @@ public class EntryParser extends AbstractParser {
                         case "depends":
                             readDepends(t, e);
                             break;
+                        case "select":
+                            readSelect(t, e);
+                            break;
                         default:
-                            skip(t);
+                            log.debug("skipping {}", skip(t));
+                            //skip(t);
                             break;
                     }
                     break;
@@ -109,19 +117,27 @@ public class EntryParser extends AbstractParser {
         }
     }
 
-    private void readType(KconfigFile t, Entry e) throws IOException {
-        e.setType(t.getTokenString());
-        while (true) {
-            switch (t.nextToken()) {
-                case ConfigParser.QUOTE_CHAR:
-                    e.setPrompt(t.getTokenString());
-                    break;
-                case StreamTokenizer.TT_EOL:
-                    return;
-                default:
-                    skip(t);
-                    return;
+    private void readPrompt(KconfigFile t, Entry e) throws IOException {        
+        int token = t.nextToken();
+        if (token == QUOTE_CHAR) {
+            String prompt = t.getTokenString();
+
+            token = t.nextToken();
+            Condition c = null;
+            if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+                c = new ConditionParser().parse(t);
             }
+
+            e.setPrompt(new Prompt(prompt, c));
+        }        
+    }
+
+    private void readType(KconfigFile t, Entry e) throws IOException {        
+        e.setType(t.getTokenString());
+        int token = t.nextToken();
+        if (token == QUOTE_CHAR) {
+            t.pushBack();
+            readPrompt(t, e);
         }
     }
 
@@ -138,7 +154,7 @@ public class EntryParser extends AbstractParser {
                     throw new ParseError(t, "option env needs an '='");
                 }
                 token = t.nextToken();
-                if (token != ConfigParser.QUOTE_CHAR) {
+                if (token != QUOTE_CHAR) {
                     throw new ParseError(t, "option env needs a quoted string");
                 }
 
@@ -157,7 +173,6 @@ public class EntryParser extends AbstractParser {
     }
 
     private void readHelp(KconfigFile t, Entry e) throws IOException {
-
         if (t.currentToken() != StreamTokenizer.TT_EOL) {
             skip(t);
         }
@@ -221,7 +236,7 @@ public class EntryParser extends AbstractParser {
 
     private void readDefault(KconfigFile t, Entry e) throws IOException {
         String def = readExpression(t);
-        
+
         int token = t.nextToken();
         Condition c = null;
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
@@ -231,5 +246,23 @@ public class EntryParser extends AbstractParser {
         e.addDefault(new Default(def, c));
     }
 
-    
+    private void readSelect(KconfigFile t, Entry e) throws IOException {
+        String select = readExpression(t);
+
+        int token = t.nextToken();
+        Condition c = null;
+        if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
+            c = new ConditionParser().parse(t);
+        }
+
+        e.addSelect(new Select(select, c));
+    }
+
+    private void readTypeWithDef(KconfigFile t, Entry e) throws IOException {
+        String type = t.getTokenString();
+        
+        e.setType(type.substring("dev_".length()));
+        readDefault(t, e);        
+    }
+
 }

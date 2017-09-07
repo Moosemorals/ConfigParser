@@ -39,8 +39,6 @@ public class ConfigParser extends AbstractParser {
 
     public static final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
-    public static final int QUOTE_CHAR = '"';
-    public static final int COMMENT_CHAR = '#';
 
     private final Deque<KconfigFile> fileStack;
     private final Environment environment;

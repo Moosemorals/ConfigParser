@@ -34,8 +34,18 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractParser {
 
+    public static final int COMMENT_CHAR = '#';
+    public static final int QUOTE_CHAR = '"';
+
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
 
+    /**
+     * Skip to the end of the line (or file) leaving the EOL/EOF on
+     * the stack.
+     * @param t
+     * @return String skipped text
+     * @throws IOException 
+     */
     protected String skip(KconfigFile t) throws IOException {
         StringBuilder skipped = new StringBuilder();
         while (true) {
@@ -68,7 +78,17 @@ public abstract class AbstractParser {
                     result.append(")");
                     break;
                 case '!':
-                    result.append("!");
+                    token = t.nextToken();
+                    if (token == '=') {
+                        result.append("!=");                        
+                    } else {
+                        t.pushBack();
+                        result.append("!");
+                    }                        
+                    result.append(readExpression(t));
+                    break;
+                case '=':
+                    result.append("=");
                     result.append(readExpression(t));
                     break;
                 case StreamTokenizer.TT_WORD:
@@ -79,7 +99,7 @@ public abstract class AbstractParser {
                     }
                     result.append(symbol);
                     break;
-                case ConfigParser.QUOTE_CHAR:                    
+                case QUOTE_CHAR:                    
                     result.append('"');
                     result.append(t.getTokenString());
                     result.append('"');

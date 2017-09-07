@@ -42,7 +42,7 @@ public class Entry {
     private final List<Implies> implies;
     private String type;
     private String value;
-    private String prompt;
+    private Prompt prompt;
     private String help;
     private String depends;
 
@@ -69,11 +69,11 @@ public class Entry {
         this.value = value;
     }
 
-    public String getPrompt() {
+    public Prompt getPrompt() {
         return prompt;
     }
 
-    public void setPrompt(String prompt) {
+    public void setPrompt(Prompt prompt) {
         this.prompt = prompt;
     }
 
@@ -113,7 +113,7 @@ public class Entry {
         return defaults;
     }
 
-    public void addSelects(Select select) {
+    public void addSelect(Select select) {
         selects.add(select);
     }
 

@@ -24,31 +24,19 @@
 
 package com.moosemorals.configparser;
 
-import java.io.File;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Main {
+public class Prompt extends ConditionalValue {
 
-    public static final File SOURCE_FOLDER = new File("/home/osric/src/linux-4.13/");
-    
-    public static final Logger log = LoggerFactory.getLogger(Main.class);
+    private final Logger log = LoggerFactory.getLogger(Prompt.class);
 
-    public static void main(String[] args) throws IOException {
-        
-        Environment environment = new Environment();
-        environment.put("SRCARCH", "x86");
-        
-        File topLevel = new File(SOURCE_FOLDER, "drivers/irqchip/Kconfig");
-        
-        new ConfigParser(environment).parse(topLevel);
-        
+    public Prompt(String value, Condition condition) {
+        super(value, condition);
     }
 
 }
