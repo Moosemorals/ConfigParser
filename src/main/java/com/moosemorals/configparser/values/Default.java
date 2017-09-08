@@ -24,7 +24,7 @@
 
 package com.moosemorals.configparser.values;
 
-import com.moosemorals.configparser.Condition;
+import com.moosemorals.configparser.types.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

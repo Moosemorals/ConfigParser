@@ -23,6 +23,7 @@
  */
 package com.moosemorals.configparser;
 
+import com.moosemorals.configparser.parsers.AbstractParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

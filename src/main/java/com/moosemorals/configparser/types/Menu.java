@@ -21,11 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.types;
 
-import com.moosemorals.configparser.values.Select;
-import com.moosemorals.configparser.values.Range;
-import com.moosemorals.configparser.values.Imply;
+import com.moosemorals.configparser.XML;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
@@ -36,65 +34,45 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Config extends Entry {
+public class Menu extends Entry {
 
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private final Logger log = LoggerFactory.getLogger(Menu.class);
 
-    private final List<Select> selects;
-    private final List<Imply> implies;
-    private final List<Range> ranges;
-    
+    private final List<Entry> entries;
 
-    Config(String symbol) {
-        super(symbol);        
-        this.selects = new LinkedList<>();
-        this.implies = new LinkedList<>();
-        this.ranges = new LinkedList<>();        
+    public Menu(String symbol) {
+        super(symbol);
+        this.entries = new LinkedList<>();
     }
 
-
-    public void addSelect(Select select) {
-        selects.add(select);
+    public void addEntry(Entry e) {
+        entries.add(e);
     }
 
-    public List<Select> getSelects() {
-        return selects;
+    public List<Entry> getEntries() {
+        return entries;
     }
 
-    public void addImplies(Imply select) {
-        implies.add(select);
-    }
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
 
-    public List<Imply> getImplies() {
-        return implies;
-    }
-    
-    public void addRange(Range range) {
-        ranges.add(range);
-    }
-    
-    public List<Range> getRanges() {
-        return ranges;
+        result.append("[menu: ").append(prompt);
+
+        result.append(entries.size()).append(entries.size() == 1 ? " entry" : " entries");
+
+        result.append("]");
+        return result.toString();
     }
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config");
-        xml.add("symbol", symbol);
-        xml.add("type", type);        
-        xml.add("value", value);
-        xml.add("help", help);
-        if (prompt != null) {
-            xml.add(prompt);    
-        }
-        
-        xml.add("defaults", defaults);
+        xml.start("menu");
+        xml.add(prompt);        
         xml.add("depends", depends);
-        xml.add("selects", selects);
-        xml.add("ranges", ranges);
+        xml.add("entries", entries);
         
         xml.end();
     }
-
 
 }

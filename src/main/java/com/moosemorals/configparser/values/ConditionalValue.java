@@ -23,7 +23,7 @@
  */
 package com.moosemorals.configparser.values;
 
-import com.moosemorals.configparser.Condition;
+import com.moosemorals.configparser.types.Condition;
 import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.XMLable;
 import javax.xml.stream.XMLStreamException;

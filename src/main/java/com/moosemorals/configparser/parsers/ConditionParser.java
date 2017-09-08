@@ -21,11 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
 
-import java.util.LinkedList;
-import java.util.List;
-import javax.xml.stream.XMLStreamException;
+package com.moosemorals.configparser.parsers;
+
+import com.moosemorals.configparser.types.Condition;
+import com.moosemorals.configparser.Environment;
+import com.moosemorals.configparser.ParseError;
+import com.moosemorals.configparser.SourceFile;
+import java.io.IOException;
+import java.io.StreamTokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,45 +37,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Menu extends Entry {
+public class ConditionParser extends AbstractParser {
 
-    private final Logger log = LoggerFactory.getLogger(Menu.class);
-
-    private final List<Entry> entries;
-
-    public Menu(String symbol) {
-        super(symbol);
-        this.entries = new LinkedList<>();
+    private final Logger log = LoggerFactory.getLogger(ConditionParser.class);
+    
+    public ConditionParser(Environment e) {
+        super(e);
     }
-
-    public void addEntry(Entry e) {
-        entries.add(e);
-    }
-
-    public List<Entry> getEntries() {
-        return entries;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-
-        result.append("[menu: ").append(prompt);
-
-        result.append(entries.size()).append(entries.size() == 1 ? " entry" : " entries");
-
-        result.append("]");
-        return result.toString();
-    }
-
-    @Override
-    public void toXML(XML xml) throws XMLStreamException {
-        xml.start("menu");
-        xml.add(prompt);        
-        xml.add("depends", depends);
-        xml.add("entries", entries);
+    
+    Condition parse(SourceFile t) throws IOException {
+        if (t.currentToken() != StreamTokenizer.TT_WORD && !t.getTokenString().equals("if")) {
+            throw new ParseError(t, "Must start parsing condition on an 'if'");
+        }
         
-        xml.end();
+        return new Condition(readExpression(t));            
     }
 
 }

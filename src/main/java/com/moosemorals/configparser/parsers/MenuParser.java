@@ -21,8 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.parsers;
 
+import com.moosemorals.configparser.types.Choice;
+import com.moosemorals.configparser.types.Comment;
+import com.moosemorals.configparser.types.Condition;
+import com.moosemorals.configparser.types.Config;
+import com.moosemorals.configparser.Environment;
+import com.moosemorals.configparser.Main;
+import com.moosemorals.configparser.types.Menu;
+import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.values.Prompt;
 import java.io.File;
 import java.io.IOException;

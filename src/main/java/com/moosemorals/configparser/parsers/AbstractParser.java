@@ -21,8 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.parsers;
 
+import com.moosemorals.configparser.types.Condition;
+import com.moosemorals.configparser.types.Entry;
+import com.moosemorals.configparser.Environment;
+import com.moosemorals.configparser.ParseError;
+import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.values.Default;
 import com.moosemorals.configparser.values.Imply;
 import com.moosemorals.configparser.values.Prompt;

@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.XML;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;

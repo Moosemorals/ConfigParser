@@ -22,8 +22,9 @@
  * THE SOFTWARE.
  */
 
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.XMLable;
 import com.moosemorals.configparser.values.Default;
 import com.moosemorals.configparser.values.Prompt;
 import java.util.LinkedList;

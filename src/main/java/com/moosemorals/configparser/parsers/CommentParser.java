@@ -21,8 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.moosemorals.configparser;
+package com.moosemorals.configparser.parsers;
 
+import com.moosemorals.configparser.types.Comment;
+import com.moosemorals.configparser.Environment;
+import com.moosemorals.configparser.ParseError;
+import com.moosemorals.configparser.SourceFile;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import org.slf4j.Logger;
