@@ -33,10 +33,12 @@ import com.moosemorals.configparser.types.Menu;
 import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.types.Entry;
 import com.moosemorals.configparser.values.Prompt;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -74,11 +76,19 @@ public class MenuParser extends AbstractParser {
         return sb.toString();
     }
 
-    private SourceFile source(String target) throws IOException {
-
-        SourceFile t = new SourceFile(target);
-        fileStack.push(t);
-        return t;
+    private SourceFile source(SourceFile current, String target) throws IOException {
+        try {
+            SourceFile t = new SourceFile(target);
+            fileStack.push(t);
+            return t;
+        } catch (FileNotFoundException ex) {
+            if (current != null) {
+            log.warn("at {}: Can't find source {}, skipping", current.getLocation(), target);
+            return current;
+            } else {
+                throw new IOException("Can't find top level file " + target);
+            }
+        }
     }
 
     public SourceFile source(SourceFile t) throws IOException {
@@ -107,24 +117,24 @@ public class MenuParser extends AbstractParser {
         }
 
         skip(t);
-        return source(target);
+        return source(t, target);
     }
 
-    public void pushIfStack(Condition c) {        
+    public void pushIfStack(Condition c) {
         ifStack.push(c);
     }
-    
+
     public void popIfStack() {
-        Condition c = ifStack.pop();        
+        Condition c = ifStack.pop();
     }
-    
+
     public Entry applyIfStack(Entry e) {
         ifStack.forEach(e::addDepends);
         return e;
     }
-    
+
     public Menu parse(String target) throws IOException {
-        return parse(source(target), null);
+        return parse(source(null, target), null);
     }
 
     public Menu parse(SourceFile t, Menu parent) throws IOException {
@@ -157,14 +167,14 @@ public class MenuParser extends AbstractParser {
                                 break;
                             }
                         case "config":
-                        case "menuconfig":                            
+                        case "menuconfig":
                             m.addEntry(applyIfStack(new ConfigParser(this, environment).parse(t)));
                             break;
                         case "choice":
-                            m.addEntry(applyIfStack(new ChoiceParser(this, environment).parse(t)));                            
+                            m.addEntry(applyIfStack(new ChoiceParser(this, environment).parse(t)));
                             break;
                         case "comment":
-                            m.addEntry(applyIfStack(new CommentParser(this, environment).parse(t)));                            
+                            m.addEntry(applyIfStack(new CommentParser(this, environment).parse(t)));
                             break;
                         case "menu":
                             m.addEntry(applyIfStack(new MenuParser(this, environment).parse(t, m)));
@@ -192,7 +202,7 @@ public class MenuParser extends AbstractParser {
                             if (skipped.length() > 0) {
                                 log.debug("Menu {}", m);
                                 throw new ParseError(t, "Skipping stuff [" + skipped + "]");
-                            }        
+                            }
                             //skip(t);
                             break;
                     }

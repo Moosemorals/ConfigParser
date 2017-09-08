@@ -24,13 +24,14 @@
 package com.moosemorals.configparser;
 
 import com.moosemorals.configparser.parsers.AbstractParser;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.io.StringReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,18 +44,14 @@ public final class SourceFile {
     private final ConfigFileReader in;
     private final String target;
     private int lines = 0;
-    
+
     public static void setBase(File base) {
         SourceFile.base = base;
     }
 
-    public SourceFile(String target) throws IOException {
+    public SourceFile(String target) throws FileNotFoundException {
         this.target = target;
-        try {
-            in = new ConfigFileReader(new PushbackReader(new FileReader(new File(base, target)), PUSHBACK_BUFFER_SIZE));
-        } catch (FileNotFoundException ex) {
-            throw new ParseError(this, "Can't find target");
-        }
+        in = new ConfigFileReader(new PushbackReader(new FileReader(new File(base, target)), PUSHBACK_BUFFER_SIZE));
         t = new StreamTokenizer(in);
         setupTokenizer();
     }
@@ -137,7 +134,7 @@ public final class SourceFile {
             return 0;
         }
     }
-    
+
     public String getLocation() {
         return String.format("%s: %d", target, getLineNumber());
     }

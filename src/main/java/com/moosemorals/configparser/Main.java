@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class Main {
 
     public static final File SOURCE_FOLDER = new File("/home/osric/src/linux-4.13/");
+    //      public static final File SOURCE_FOLDER = new File("/home/osric/src/buildroot-2017.02.5/");
 
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
@@ -48,7 +49,7 @@ public class Main {
         environment.put("SRCARCH", "x86");
         environment.put("ARCH", "x86");
         environment.put("KERNELVERSION", "4.13");
-       
+
         SourceFile.setBase(SOURCE_FOLDER);
         Menu top = new MenuParser(null, environment).parse("Kconfig");
 

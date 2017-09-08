@@ -185,15 +185,14 @@ public abstract class AbstractParser {
             }
         }
         line = tabsToSpaces(line);
-        int indent = line.indexOf(line.trim());
-        line = line.trim();
+        int indent = line.indexOf(line.trim());        
         if (indent == 0) {
             // No help            
             return;
         }
 
         StringBuilder help = new StringBuilder();
-        help.append(line);
+        help.append(line.substring(indent)).append("\n");
         while ((line = t.readLine()) != null) {
             int offset = 0;
             if (line.matches("\\s+")) {
@@ -202,19 +201,18 @@ public abstract class AbstractParser {
 
             if (line.length() > 0) {
                 line = tabsToSpaces(line);
-                offset = line.indexOf(line.trim());
-                line = line.trim();
+                offset = line.indexOf(line.trim());                
             }
 
             if (offset < indent) {
                 if (line.length() > 0) {
                     t.unreadLine(line);
-                    break;
+                    break;                
                 } else {
                     help.append("\n");
                 }
             } else {
-                help.append(line);
+                help.append(line.substring(indent)).append("\n");
             }
         }
         e.setHelp(help.toString());
