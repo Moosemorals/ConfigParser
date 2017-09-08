@@ -133,7 +133,37 @@ public final class SourceFile {
         }
     }
 
-    public String getLocation() {
-        return String.format("%s: %d", target, getLineNumber());
+    public Location getLocation() {
+        return new Location(target, getLineNumber());        
+    }
+
+    /**
+     *
+     * @author Osric Wilkinson (osric@fluffypeople.com)
+     */
+    public static class Location {
+
+        private final Logger log = LoggerFactory.getLogger(Location.class);
+        private final String file;
+        private final String line;
+        
+        public Location(String file, int line) {
+            this.file = file;
+            this.line = String.format("%d", line);
+        }
+
+        public String getFile() {
+            return file;
+        }
+
+        public String getLine() {
+            return line;
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("%s: %s", file, line);
+        }
+        
     }
 }

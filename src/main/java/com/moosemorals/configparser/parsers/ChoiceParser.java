@@ -58,7 +58,7 @@ public class ChoiceParser extends AbstractParser {
             t.pushBack();
         }
 
-        c = new Choice(symbol);
+        c = new Choice(t.getLocation(), symbol);
 
         while (true) {
             int token = t.nextToken();

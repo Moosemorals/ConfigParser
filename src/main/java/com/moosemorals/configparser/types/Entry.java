@@ -23,6 +23,8 @@
  */
 package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.SourceFile;
+import com.moosemorals.configparser.SourceFile.Location;
 import com.moosemorals.configparser.XMLable;
 import com.moosemorals.configparser.values.Default;
 import com.moosemorals.configparser.values.Prompt;
@@ -31,6 +33,7 @@ import java.util.List;
 
 public abstract class Entry implements XMLable {
 
+    protected final SourceFile.Location location;
     protected final String symbol;
     protected final List<Default> defaults;
     protected final List<Condition> depends;
@@ -39,7 +42,8 @@ public abstract class Entry implements XMLable {
     protected Prompt prompt;
     protected String help;
 
-    public Entry(String symbol) {
+    public Entry(Location location, String symbol) {
+        this.location = location;
         this.symbol = symbol;
         this.defaults = new LinkedList<>();
         this.depends = new LinkedList<>();

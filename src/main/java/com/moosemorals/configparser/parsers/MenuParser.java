@@ -23,10 +23,7 @@
  */
 package com.moosemorals.configparser.parsers;
 
-import com.moosemorals.configparser.types.Choice;
-import com.moosemorals.configparser.types.Comment;
 import com.moosemorals.configparser.types.Condition;
-import com.moosemorals.configparser.types.Config;
 import com.moosemorals.configparser.Environment;
 import com.moosemorals.configparser.ParseError;
 import com.moosemorals.configparser.types.Menu;
@@ -38,7 +35,6 @@ import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -83,7 +79,7 @@ public class MenuParser extends AbstractParser {
             return t;
         } catch (FileNotFoundException ex) {
             if (current != null) {
-            log.warn("at {}: Can't find source {}, skipping", current.getLocation(), target);
+            log.warn("at {}: Can't find source {}, skipping", current.getLocation().toString(), target);
             return current;
             } else {
                 throw new IOException("Can't find top level file " + target);
@@ -139,7 +135,7 @@ public class MenuParser extends AbstractParser {
 
     public Menu parse(SourceFile t, Menu parent) throws IOException {
 
-        Menu m = new Menu(null);
+        Menu m = new Menu(t.getLocation(), null);
         if (parent != null) {
             readPrompt(t, m);
         }

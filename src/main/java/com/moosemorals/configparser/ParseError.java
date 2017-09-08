@@ -36,7 +36,7 @@ public class ParseError extends RuntimeException {
     private final Logger log = LoggerFactory.getLogger(ParseError.class);
     
     public ParseError(SourceFile t, String message) {
-        super(message + " at " + t.getLocation());
+        super(message + " at " + t.getLocation().toString());
     }
 
 }

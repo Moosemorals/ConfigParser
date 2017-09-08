@@ -23,6 +23,7 @@
  */
 package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.SourceFile.Location;
 import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.values.Default;
 import java.util.List;
@@ -38,8 +39,8 @@ public class Comment extends Entry {
 
     private final Logger log = LoggerFactory.getLogger(Comment.class);
 
-    public Comment(String symbol) {
-        super(symbol);
+    public Comment(Location location, String symbol) {
+        super(location, symbol);
     }
 
     @Override
@@ -109,7 +110,7 @@ public class Comment extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("comment");
+        xml.start("comment", "file", location.getFile(), "line", location.getLine());
 
         if (prompt != null) {
             xml.add(prompt);

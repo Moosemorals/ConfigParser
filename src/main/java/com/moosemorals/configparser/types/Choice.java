@@ -23,6 +23,7 @@
  */
 package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.SourceFile.Location;
 import com.moosemorals.configparser.XML;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,8 +41,8 @@ public class Choice extends Entry {
 
     private final List<Entry> entries;
 
-    public Choice(String symbol) {
-        super(symbol);
+    public Choice(Location location, String symbol) {
+        super(location, symbol);
         this.entries = new LinkedList<>();
     }
 
@@ -55,7 +56,7 @@ public class Choice extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("choice");
+        xml.start("choice", "file", location.getFile(), "line", location.getLine());
         xml.add("symbol", symbol);
         xml.add("type", type);
         xml.add("value", value);

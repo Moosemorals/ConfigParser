@@ -59,7 +59,7 @@ public class ConfigParser extends AbstractParser {
             throw new ParseError(t, "Expecting word to follow 'config'");
         }
 
-        e = new Config(t.getTokenString());
+        e = new Config(t.getLocation(), t.getTokenString());
 
         while (true) {
             int token = t.nextToken();

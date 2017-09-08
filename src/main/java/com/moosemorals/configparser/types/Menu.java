@@ -23,6 +23,7 @@
  */
 package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.SourceFile.Location;
 import com.moosemorals.configparser.XML;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,8 +42,8 @@ public class Menu extends Entry {
     private final List<Entry> entries;
     private Condition visibleIf;
 
-    public Menu(String symbol) {
-        super(symbol);
+    public Menu(Location location, String symbol) {
+        super(location, symbol);
         this.entries = new LinkedList<>();
     }
 
@@ -76,7 +77,7 @@ public class Menu extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("menu");
+        xml.start("menu", "file", location.getFile(), "line", location.getLine());
         if (visibleIf != null) {
             xml.add("visibleIf", visibleIf.toString());
         }

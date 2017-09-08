@@ -49,7 +49,7 @@ public class CommentParser extends AbstractParser {
             throw new ParseError(t, "Must be called on comment");
         }
         
-        Comment c = new Comment(null);
+        Comment c = new Comment(t.getLocation(), null);
 
         readPrompt(t, c);
 

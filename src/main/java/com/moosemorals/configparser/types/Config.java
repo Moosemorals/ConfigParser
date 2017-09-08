@@ -23,6 +23,7 @@
  */
 package com.moosemorals.configparser.types;
 
+import com.moosemorals.configparser.SourceFile.Location;
 import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.values.Select;
 import com.moosemorals.configparser.values.Range;
@@ -45,8 +46,8 @@ public class Config extends Entry {
     private final List<Imply> implies;
     private final List<Range> ranges;
 
-    public Config(String symbol) {
-        super(symbol);
+    public Config(Location location, String symbol) {
+        super(location, symbol);
         this.selects = new LinkedList<>();
         this.implies = new LinkedList<>();
         this.ranges = new LinkedList<>();
@@ -84,7 +85,7 @@ public class Config extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config");
+        xml.start("config", "file", location.getFile(), "line", location.getLine());
         xml.add("symbol", symbol);
         xml.add("type", type);
         xml.add("value", value);
