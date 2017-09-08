@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public final class SourceFile {
 
-    private static File base;
+    private static File root = new File("/");
     private final Logger log = LoggerFactory.getLogger(SourceFile.class);
     private final static int PUSHBACK_BUFFER_SIZE = 8 * 1024; // Probably overkill.
     private final StreamTokenizer t;
@@ -45,13 +45,13 @@ public final class SourceFile {
     private final String target;
     private int lines = 0;
 
-    public static void setBase(File base) {
-        SourceFile.base = base;
+    public static void setRoot(File base) {
+        SourceFile.root = base;
     }
 
     public SourceFile(String target) throws FileNotFoundException {
         this.target = target;
-        in = new ConfigFileReader(new PushbackReader(new FileReader(new File(base, target)), PUSHBACK_BUFFER_SIZE));
+        in = new ConfigFileReader(new PushbackReader(new FileReader(new File(root, target)), PUSHBACK_BUFFER_SIZE));
         t = new StreamTokenizer(in);
         setupTokenizer();
     }

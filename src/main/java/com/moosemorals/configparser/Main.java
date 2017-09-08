@@ -50,7 +50,7 @@ public class Main {
         environment.put("ARCH", "x86");
         environment.put("KERNELVERSION", "4.13");
 
-        SourceFile.setBase(SOURCE_FOLDER);
+        SourceFile.setRoot(SOURCE_FOLDER);
         Menu top = new MenuParser(null, environment).parse("Kconfig");
 
         log.debug("Saving to XML");
