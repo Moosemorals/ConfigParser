@@ -55,7 +55,7 @@ public class Choice extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config");
+        xml.start("choice");
         xml.add("symbol", symbol);
         xml.add("type", type);
         xml.add("value", value);
