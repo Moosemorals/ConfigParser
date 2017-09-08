@@ -23,13 +23,8 @@
  */
 package com.moosemorals.configparser.types;
 
-import com.moosemorals.configparser.SourceFile.Location;
+import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.XML;
-import com.moosemorals.configparser.values.Select;
-import com.moosemorals.configparser.values.Range;
-import com.moosemorals.configparser.values.Imply;
-import java.util.LinkedList;
-import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,54 +33,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Config extends Entry {
+public class MenuConfig extends Config {
 
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private final Logger log = LoggerFactory.getLogger(MenuConfig.class);
 
-    protected final List<Select> selects;
-    protected final List<Imply> implies;
-    protected final List<Range> ranges;
-
-    public Config(Location location, String symbol) {
+    public MenuConfig(SourceFile.Location location, String symbol) {
         super(location, symbol);
-        this.selects = new LinkedList<>();
-        this.implies = new LinkedList<>();
-        this.ranges = new LinkedList<>();
-    }
-
-    public void addSelect(Select select) {
-        if (!selects.contains(select)) {
-            selects.add(select);
-        }
-    }
-
-    public List<Select> getSelects() {
-        return selects;
-    }
-
-    public void addImplies(Imply imply) {
-        if (!implies.contains(imply)) {
-            implies.add(imply);
-        }
-    }
-
-    public List<Imply> getImplies() {
-        return implies;
-    }
-
-    public void addRange(Range range) {
-        if (!ranges.contains(range)) {
-            ranges.add(range);
-        }
-    }
-
-    public List<Range> getRanges() {
-        return ranges;
     }
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config", "file", location.getFile(), "line", location.getLine());
+        xml.start("menuconfig", "file", location.getFile(), "line", location.getLine());
         xml.add("symbol", symbol);
         xml.add("type", type);
         xml.add("value", value);

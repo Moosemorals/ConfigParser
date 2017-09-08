@@ -28,6 +28,7 @@ import com.moosemorals.configparser.types.Config;
 import com.moosemorals.configparser.Environment;
 import com.moosemorals.configparser.ParseError;
 import com.moosemorals.configparser.SourceFile;
+import com.moosemorals.configparser.types.MenuConfig;
 import com.moosemorals.configparser.values.Imply;
 import com.moosemorals.configparser.values.Range;
 import com.moosemorals.configparser.values.Select;
@@ -51,7 +52,8 @@ public class ConfigParser extends AbstractParser {
     public Config parse(SourceFile t) throws IOException {
 
         Config e;
-        if (!("config".equals(t.getTokenString()) || "menuconfig".equals(t.getTokenString()))) {
+        String type = t.getTokenString();
+        if (!("config".equals(type) || "menuconfig".equals(type))) {
             throw new ParseError(t, "Must be called on config");
         }
 
@@ -59,7 +61,11 @@ public class ConfigParser extends AbstractParser {
             throw new ParseError(t, "Expecting word to follow 'config'");
         }
 
-        e = new Config(t.getLocation(), t.getTokenString());
+        if (type.equals("config")) {
+            e = new Config(t.getLocation(), t.getTokenString());
+        } else {
+            e = new MenuConfig(t.getLocation(), t.getTokenString());
+        }
 
         while (true) {
             int token = t.nextToken();

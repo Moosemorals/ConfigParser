@@ -79,8 +79,8 @@ public class MenuParser extends AbstractParser {
             return t;
         } catch (FileNotFoundException ex) {
             if (current != null) {
-            log.warn("at {}: Can't find source {}, skipping", current.getLocation().toString(), target);
-            return current;
+                log.warn("at {}: Can't find source {}, skipping", current.getLocation().toString(), target);
+                return current;
             } else {
                 throw new IOException("Can't find top level file " + target);
             }
