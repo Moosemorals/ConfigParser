@@ -24,6 +24,9 @@
 package com.moosemorals.configparser.values;
 
 import com.moosemorals.configparser.Condition;
+import com.moosemorals.configparser.XML;
+import com.moosemorals.configparser.XMLable;
+import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public abstract class ConditionalValue {
+public abstract class ConditionalValue implements XMLable {
 
     private final Logger log = LoggerFactory.getLogger(ConditionalValue.class);
 
@@ -60,6 +63,18 @@ public abstract class ConditionalValue {
         }        
         result.append("]");
         return result.toString();
+    }
+
+    @Override
+    public void toXML(XML xml) throws XMLStreamException {
+        
+        
+        if (condition != null) {
+            xml.add(getClass().getSimpleName().toLowerCase(), value, "if", condition.toString());            
+        }        else {
+            xml.add(getClass().getSimpleName().toLowerCase(), value);
+        }
+        
     }
 
 }

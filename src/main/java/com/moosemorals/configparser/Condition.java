@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser;
 
+import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +31,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Condition {
+public class Condition implements XMLable {
 
     private final Logger log = LoggerFactory.getLogger(Condition.class);
     private final String condition;
-    
+
     public Condition(String condition) {
         this.condition = condition;
     }
-    
+
     public boolean evaluate() {
         throw new RuntimeException("Method not written yet");
     }
-    
+
     @Override
     public String toString() {
         return condition;
+    }
+
+    @Override
+    public void toXML(XML xml) throws XMLStreamException {
+        xml.add("condition", condition);
     }
 
 }

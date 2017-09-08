@@ -28,6 +28,7 @@ import com.moosemorals.configparser.values.Range;
 import com.moosemorals.configparser.values.Imply;
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +75,25 @@ public class Config extends Entry {
     
     public List<Range> getRanges() {
         return ranges;
+    }
+
+    @Override
+    public void toXML(XML xml) throws XMLStreamException {
+        xml.start("config");
+        xml.add("symbol", symbol);
+        xml.add("type", type);        
+        xml.add("value", value);
+        xml.add("help", help);
+        if (prompt != null) {
+            xml.add(prompt);    
+        }
+        
+        xml.add("defaults", defaults);
+        xml.add("depends", depends);
+        xml.add("selects", selects);
+        xml.add("ranges", ranges);
+        
+        xml.end();
     }
 
 

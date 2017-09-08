@@ -29,11 +29,7 @@ import com.moosemorals.configparser.values.Prompt;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author Osric Wilkinson (osric@fluffypeople.com)
- */
-public class Entry {
+public abstract class Entry implements XMLable {
 
     protected final String symbol;
     protected final List<Default> defaults;
@@ -142,5 +138,5 @@ public class Entry {
         result.append("]");
         return result.toString();
     }
-
+       
 }

@@ -25,6 +25,7 @@ package com.moosemorals.configparser;
 
 import com.moosemorals.configparser.values.Default;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +91,7 @@ public class Comment extends Entry {
         StringBuilder result = new StringBuilder();
 
         result.append("[comment:").append(prompt);
-        
+
         if (!depends.isEmpty()) {
             result.append(" dep: ");
             for (int i = 0; i < depends.size(); i += 1) {
@@ -103,6 +104,18 @@ public class Comment extends Entry {
 
         result.append("]");
         return result.toString();
+    }
+
+    @Override
+    public void toXML(XML xml) throws XMLStreamException {
+        xml.start("comment");
+
+        if (prompt != null) {
+            xml.add(prompt);
+        }
+        xml.add("depends", depends);
+
+        xml.end();
     }
 
 }

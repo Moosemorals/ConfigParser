@@ -23,49 +23,14 @@
  */
 package com.moosemorals.configparser;
 
-import java.util.LinkedList;
-import java.util.List;
 import javax.xml.stream.XMLStreamException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class Choice extends Entry {
-
-    private final Logger log = LoggerFactory.getLogger(Choice.class);
-
-    private final List<Config> configs;
-
-    public Choice(String symbol) {
-        super(symbol);
-        this.configs = new LinkedList<>();
-    }
-
-    public void addConfig(Config e) {
-        configs.add(e);
-    }
-
-    public List<Config> getConfigs() {
-        return configs;
-    }
-
-    @Override
-    public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config");
-        xml.add("symbol", symbol);
-        xml.add("type", type);
-        xml.add("value", value);
-        xml.add("help", help);
-        xml.add(prompt);
-
-        xml.add("defaults", defaults);
-        xml.add("depends", depends);
-        xml.add("configs", configs);
-        
-        xml.end();
-    }
-
+public interface XMLable {
+    
+    void toXML(XML xml) throws XMLStreamException;
+    
 }

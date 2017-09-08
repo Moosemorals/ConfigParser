@@ -25,6 +25,7 @@ package com.moosemorals.configparser;
 
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,16 @@ public class Menu extends Entry {
 
         result.append("]");
         return result.toString();
+    }
+
+    @Override
+    public void toXML(XML xml) throws XMLStreamException {
+        xml.start("menu");
+        xml.add(prompt);        
+        xml.add("depends", depends);
+        xml.add("entries", entries);
+        
+        xml.end();
     }
 
 }
