@@ -25,6 +25,7 @@ package com.moosemorals.configparser.types;
 
 import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.XMLable;
+import java.util.Objects;
 import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,4 +57,30 @@ public class Condition implements XMLable {
         xml.add("condition", condition);
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.condition);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Condition other = (Condition) obj;
+        if (!Objects.equals(this.condition, other.condition)) {
+            return false;
+        }
+        return true;
+    }
+
+    
 }

@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.moosemorals.configparser.types;
 
 import com.moosemorals.configparser.XMLable;
@@ -91,7 +90,9 @@ public abstract class Entry implements XMLable {
     }
 
     public void addDepends(Condition condition) {
-        depends.add(condition);
+        if (!depends.contains(condition)) {
+            depends.add(condition);
+        }
     }
 
     public void addDefault(Default def) {
@@ -139,5 +140,5 @@ public abstract class Entry implements XMLable {
         result.append("]");
         return result.toString();
     }
-       
+
 }

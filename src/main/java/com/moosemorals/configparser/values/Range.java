@@ -25,6 +25,7 @@
 package com.moosemorals.configparser.values;
 
 import com.moosemorals.configparser.types.Condition;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class Range extends ConditionalValue {
     private final Logger log = LoggerFactory.getLogger(Range.class);
 
     private final String value2;
-    
+
     public Range(String value1, String value2,  Condition condition) {
         super(value1, condition);
         this.value2 = value2;
@@ -46,6 +47,42 @@ public class Range extends ConditionalValue {
     public String getValue2() {
         return value2;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + Objects.hashCode(this.value2);
+        hash = 97 * hash + Objects.hashCode(this.value);
+        hash = 97 * hash + Objects.hashCode(this.condition);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Range other = (Range) obj;
+        if (!Objects.equals(this.value2, other.value2)) {
+            return false;
+        }
+        if (!Objects.equals(this.value, other.value)) {
+            return false;
+        }
+        if (!Objects.equals(this.condition, other.condition)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    
     
     @Override
     public String toString() {

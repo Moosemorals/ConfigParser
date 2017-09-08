@@ -44,36 +44,40 @@ public class Config extends Entry {
     private final List<Select> selects;
     private final List<Imply> implies;
     private final List<Range> ranges;
-    
 
     public Config(String symbol) {
-        super(symbol);        
+        super(symbol);
         this.selects = new LinkedList<>();
         this.implies = new LinkedList<>();
-        this.ranges = new LinkedList<>();        
+        this.ranges = new LinkedList<>();
     }
 
-
     public void addSelect(Select select) {
-        selects.add(select);
+        if (!selects.contains(select)) {
+            selects.add(select);
+        }
     }
 
     public List<Select> getSelects() {
         return selects;
     }
 
-    public void addImplies(Imply select) {
-        implies.add(select);
+    public void addImplies(Imply imply) {
+        if (!implies.contains(imply)) {
+            implies.add(imply);
+        }
     }
 
     public List<Imply> getImplies() {
         return implies;
     }
-    
+
     public void addRange(Range range) {
-        ranges.add(range);
+        if (!ranges.contains(range)) {
+            ranges.add(range);
+        }
     }
-    
+
     public List<Range> getRanges() {
         return ranges;
     }
@@ -82,20 +86,19 @@ public class Config extends Entry {
     public void toXML(XML xml) throws XMLStreamException {
         xml.start("config");
         xml.add("symbol", symbol);
-        xml.add("type", type);        
+        xml.add("type", type);
         xml.add("value", value);
         xml.add("help", help);
         if (prompt != null) {
-            xml.add(prompt);    
+            xml.add(prompt);
         }
-        
+
         xml.add("defaults", defaults);
         xml.add("depends", depends);
         xml.add("selects", selects);
         xml.add("ranges", ranges);
-        
+
         xml.end();
     }
-
 
 }

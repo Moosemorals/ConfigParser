@@ -125,7 +125,7 @@ public class MenuParser extends AbstractParser {
     }
 
     public void popIfStack() {
-        Condition c = ifStack.pop();
+        ifStack.pop();
     }
 
     public Entry applyIfStack(Entry e) {

@@ -26,6 +26,7 @@ package com.moosemorals.configparser.values;
 import com.moosemorals.configparser.types.Condition;
 import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.XMLable;
+import java.util.Objects;
 import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,37 @@ public abstract class ConditionalValue implements XMLable {
     public boolean evaluate() {
         return condition.evaluate();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.value);
+        hash = 53 * hash + Objects.hashCode(this.condition);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ConditionalValue other = (ConditionalValue) obj;
+        if (!Objects.equals(this.value, other.value)) {
+            return false;
+        }
+        if (!Objects.equals(this.condition, other.condition)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
     
     @Override
     public String toString() {
