@@ -44,8 +44,8 @@ public class ConfigParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
-    public ConfigParser(Environment e) {
-        super(e);
+    public ConfigParser(MenuParser parentParser, Environment e) {
+        super(parentParser, e);
     }
 
     public Config parse(SourceFile t) throws IOException {
@@ -142,7 +142,7 @@ public class ConfigParser extends AbstractParser {
         Condition c = null;
         int token = t.nextToken();
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
+            c = new ConditionParser(parentMenu, environment).parse(t);
         }
         conf.addRange(new Range(value1, value2, c));
     }
@@ -152,7 +152,7 @@ public class ConfigParser extends AbstractParser {
         int token = t.nextToken();
         Condition c = null;
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
+            c = new ConditionParser(parentMenu, environment).parse(t);
         }
         conf.addSelect(new Select(select, c));
     }
@@ -162,7 +162,7 @@ public class ConfigParser extends AbstractParser {
         int token = t.nextToken();
         Condition c = null;
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
+            c = new ConditionParser(parentMenu, environment).parse(t);
         }
         conf.addImplies(new Imply(imply, c));
     }

@@ -52,8 +52,10 @@ public abstract class AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
     protected final Environment environment;
+    protected final MenuParser parentMenu;
 
-    public AbstractParser(Environment e) {
+    public AbstractParser(MenuParser parentParser, Environment e) {
+        this.parentMenu = parentParser;
         this.environment = e;
     }
 
@@ -70,6 +72,9 @@ public abstract class AbstractParser {
             int token = t.nextToken();
             if (token == StreamTokenizer.TT_EOL || token == StreamTokenizer.TT_EOF) {
                 t.pushBack();
+                if (skipped.length() > 0) {
+                    log.warn("Skipped {}", skipped.toString());
+                }
                 return skipped.toString();
             } else {
                 if (token == StreamTokenizer.TT_WORD) {
@@ -147,7 +152,7 @@ public abstract class AbstractParser {
         int token = t.nextToken();
         Condition c = null;
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-            c = new ConditionParser(environment).parse(t);
+            c = new ConditionParser(parentMenu, environment).parse(t);
         } else {
             t.pushBack();
         }
@@ -251,7 +256,7 @@ public abstract class AbstractParser {
             token = t.nextToken();
             Condition c = null;
             if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
-                c = new ConditionParser(environment).parse(t);
+                c = new ConditionParser(parentMenu, environment).parse(t);
             }
             e.setPrompt(new Prompt(prompt, c));
         }

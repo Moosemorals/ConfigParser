@@ -27,6 +27,7 @@ import com.moosemorals.configparser.types.Choice;
 import com.moosemorals.configparser.Environment;
 import com.moosemorals.configparser.ParseError;
 import com.moosemorals.configparser.SourceFile;
+import com.moosemorals.configparser.types.Condition;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import org.slf4j.Logger;
@@ -40,12 +41,11 @@ public class ChoiceParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ChoiceParser.class);
 
-    public ChoiceParser(Environment e) {
-        super(e);
+    public ChoiceParser(MenuParser parentParser, Environment e) {
+        super(parentParser, e);
     }
 
-    public Choice parse(SourceFile t) throws IOException {
-
+    public Choice parse(SourceFile t) throws IOException {        
         Choice c;
         if (!"choice".equals(t.getTokenString())) {
             throw new ParseError(t, "Must be called on choice");
@@ -68,17 +68,24 @@ public class ChoiceParser extends AbstractParser {
                     return c;
                 case StreamTokenizer.TT_WORD:
                     switch (t.getTokenString()) {
+                        case "menuconfig":
                         case "config":
-                            c.addEntry(new ConfigParser(environment).parse(t));
+                            c.addEntry(parentMenu.applyIfStack(new ConfigParser(parentMenu, environment).parse(t)));
                             break;
-                        case "endchoice":
+                        case "endchoice":                            
                             t.pushBack();
                             return c;
                         case "comment":
-                            c.addEntry(new CommentParser(environment).parse(t));
+                            c.addEntry(parentMenu.applyIfStack(new CommentParser(parentMenu, environment).parse(t)));
                             break;
                         case "source":
-                            t = source(t);
+                            t = parentMenu.source(t);
+                            break;
+                        case "if":
+                            parentMenu.pushIfStack(new Condition(readExpression(t)));
+                            break;
+                        case "endif":
+                            parentMenu.popIfStack();
                             break;
                         case "string":
                         case "bool":

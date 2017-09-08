@@ -41,8 +41,8 @@ public class ConditionParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ConditionParser.class);
     
-    public ConditionParser(Environment e) {
-        super(e);
+    public ConditionParser(MenuParser parentParser, Environment e) {
+        super(parentParser, e);
     }
     
     Condition parse(SourceFile t) throws IOException {

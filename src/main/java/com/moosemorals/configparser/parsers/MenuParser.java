@@ -28,8 +28,10 @@ import com.moosemorals.configparser.types.Comment;
 import com.moosemorals.configparser.types.Condition;
 import com.moosemorals.configparser.types.Config;
 import com.moosemorals.configparser.Environment;
+import com.moosemorals.configparser.ParseError;
 import com.moosemorals.configparser.types.Menu;
 import com.moosemorals.configparser.SourceFile;
+import com.moosemorals.configparser.types.Entry;
 import com.moosemorals.configparser.values.Prompt;
 import java.io.IOException;
 import java.io.StreamTokenizer;
@@ -47,16 +49,15 @@ public class MenuParser extends AbstractParser {
     private final Deque<SourceFile> fileStack;
     private final Deque<Condition> ifStack;
 
-    public MenuParser(Environment environment) {
-        super(environment);
-        fileStack = new LinkedList<>();
-        ifStack = new LinkedList<>();
-    }
-
-    private MenuParser(Environment environment, Deque<Condition> ifStack, Deque<SourceFile> fileStack) {
-        super(environment);
-        this.ifStack = ifStack;
-        this.fileStack = fileStack;
+    public MenuParser(MenuParser parentParser, Environment environment) {
+        super(parentParser, environment);
+        if (parentParser == null) {
+            fileStack = new LinkedList<>();
+            ifStack = new LinkedList<>();
+        } else {
+            fileStack = parentParser.fileStack;
+            ifStack = parentParser.ifStack;
+        }
     }
 
     String replaceSymbols(String original) {
@@ -80,7 +81,7 @@ public class MenuParser extends AbstractParser {
         return t;
     }
 
-    private SourceFile source(SourceFile t) throws IOException {
+    public SourceFile source(SourceFile t) throws IOException {
         String target;
         int token = t.nextToken();
         if (token == DOUBLE_QUOTE_CHAR || token == QUOTE_CHAR) {
@@ -105,10 +106,23 @@ public class MenuParser extends AbstractParser {
             }
         }
 
-        skip(t);      
+        skip(t);
         return source(target);
     }
 
+    public void pushIfStack(Condition c) {        
+        ifStack.push(c);
+    }
+    
+    public void popIfStack() {
+        Condition c = ifStack.pop();        
+    }
+    
+    public Entry applyIfStack(Entry e) {
+        ifStack.forEach(e::addDepends);
+        return e;
+    }
+    
     public Menu parse(String target) throws IOException {
         return parse(source(target), null);
     }
@@ -130,7 +144,7 @@ public class MenuParser extends AbstractParser {
                         log.debug("Completed parse");
                         return m;
                     } else {
-                        t = fileStack.peek();                        
+                        t = fileStack.peek();
                     }
                     break;
 
@@ -143,37 +157,29 @@ public class MenuParser extends AbstractParser {
                                 break;
                             }
                         case "config":
-                        case "menuconfig":
-                            Config config = new ConfigParser(environment).parse(t);
-                            ifStack.forEach(config::addDepends);
-                            m.addEntry(config);
+                        case "menuconfig":                            
+                            m.addEntry(applyIfStack(new ConfigParser(this, environment).parse(t)));
                             break;
                         case "choice":
-                            Choice choice = new ChoiceParser(environment).parse(t);
-                            ifStack.forEach(choice::addDepends);
-                            m.addEntry(choice);
+                            m.addEntry(applyIfStack(new ChoiceParser(this, environment).parse(t)));                            
                             break;
                         case "comment":
-                            Comment comment = new CommentParser(environment).parse(t);
-                            ifStack.forEach(comment::addDepends);
-                            m.addEntry(comment);
+                            m.addEntry(applyIfStack(new CommentParser(this, environment).parse(t)));                            
                             break;
                         case "menu":
-                            Menu menu = new MenuParser(environment, ifStack, fileStack).parse(t, m);
-                            ifStack.forEach(menu::addDepends);
-                            m.addEntry(menu);
+                            m.addEntry(applyIfStack(new MenuParser(this, environment).parse(t, m)));
                             break;
                         case "endmenu":
                             return m;
                         case "visible":
                             t.nextToken();
-                            m.setVisibleIf(new ConditionParser(environment).parse(t));
+                            m.setVisibleIf(new ConditionParser(this, environment).parse(t));
                             break;
                         case "if":
-                            ifStack.push(new Condition(readExpression(t)));
+                            pushIfStack(new Condition(readExpression(t)));
                             break;
                         case "endif":
-                            ifStack.pop();
+                            popIfStack();
                             break;
                         case "source":
                             t = source(t);
@@ -182,14 +188,17 @@ public class MenuParser extends AbstractParser {
                             readDepends(t, m);
                             break;
                         default:
-                            log.debug("menu skipping {}", skip(t));
+                            String skipped = skip(t);
+                            if (skipped.length() > 0) {
+                                log.debug("Menu {}", m);
+                                throw new ParseError(t, "Skipping stuff [" + skipped + "]");
+                            }        
                             //skip(t);
                             break;
                     }
                     break;
             }
         }
-
     }
 
 }

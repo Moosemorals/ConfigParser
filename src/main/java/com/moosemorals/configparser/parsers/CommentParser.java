@@ -40,8 +40,8 @@ public class CommentParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(CommentParser.class);
 
-    public CommentParser(Environment e) {
-        super(e);
+    public CommentParser(MenuParser parentParser, Environment e) {
+        super(parentParser, e);
     }
 
     public Comment parse(SourceFile t) throws IOException {                        

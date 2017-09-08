@@ -50,8 +50,9 @@ public class Main {
         environment.put("KERNELVERSION", "4.13");
        
         SourceFile.setBase(SOURCE_FOLDER);
-        Menu top = new MenuParser(environment).parse("Kconfig");
+        Menu top = new MenuParser(null, environment).parse("Kconfig");
 
+        log.debug("Saving to XML");
         try (FileWriter out = new FileWriter(new File("/tmp/config.xml"))) {
             XML xml = new XML(out);
             top.toXML(xml);
@@ -60,7 +61,7 @@ public class Main {
         } catch (XMLStreamException ex) {
             throw new IOException(ex);
         }
-
+        log.debug("Save complete");
     }
 
 }
