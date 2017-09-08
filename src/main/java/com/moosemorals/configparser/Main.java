@@ -48,10 +48,9 @@ public class Main {
         environment.put("SRCARCH", "x86");
         environment.put("ARCH", "x86");
         environment.put("KERNELVERSION", "4.13");
-
-        File topLevel = new File(SOURCE_FOLDER, "Kconfig");
-
-        Menu top = new MenuParser(environment).parse(topLevel);
+       
+        SourceFile.setBase(SOURCE_FOLDER);
+        Menu top = new MenuParser(environment).parse("Kconfig");
 
         try (FileWriter out = new FileWriter(new File("/tmp/config.xml"))) {
             XML xml = new XML(out);

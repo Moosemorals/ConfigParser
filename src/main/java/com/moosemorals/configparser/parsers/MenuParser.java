@@ -28,11 +28,9 @@ import com.moosemorals.configparser.types.Comment;
 import com.moosemorals.configparser.types.Condition;
 import com.moosemorals.configparser.types.Config;
 import com.moosemorals.configparser.Environment;
-import com.moosemorals.configparser.Main;
 import com.moosemorals.configparser.types.Menu;
 import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.values.Prompt;
-import java.io.File;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.Deque;
@@ -75,7 +73,7 @@ public class MenuParser extends AbstractParser {
         return sb.toString();
     }
 
-    private SourceFile source(File target) throws IOException {
+    private SourceFile source(String target) throws IOException {
 
         SourceFile t = new SourceFile(target);
         fileStack.push(t);
@@ -85,7 +83,7 @@ public class MenuParser extends AbstractParser {
     private SourceFile source(SourceFile t) throws IOException {
         String target;
         int token = t.nextToken();
-        if (token == QUOTE_CHAR) {
+        if (token == DOUBLE_QUOTE_CHAR || token == QUOTE_CHAR) {
             target = replaceSymbols(t.getTokenString());
         } else {
             StringBuilder result = new StringBuilder();
@@ -107,17 +105,11 @@ public class MenuParser extends AbstractParser {
             }
         }
 
-        skip(t);
-
-        log.debug("Depth {}: Opening {} from {}:{}", getDepth(), target, t.getPath(), t.getLineNumber());
-        return source(new File(Main.SOURCE_FOLDER, target));
+        skip(t);      
+        return source(target);
     }
 
-    private int getDepth() {
-        return ((LinkedList) fileStack).size();
-    }
-
-    public Menu parse(File target) throws IOException {
+    public Menu parse(String target) throws IOException {
         return parse(source(target), null);
     }
 
@@ -138,8 +130,7 @@ public class MenuParser extends AbstractParser {
                         log.debug("Completed parse");
                         return m;
                     } else {
-                        t = fileStack.peek();
-                        log.debug("Back to {}", t.getPath());
+                        t = fileStack.peek();                        
                     }
                     break;
 
@@ -174,6 +165,10 @@ public class MenuParser extends AbstractParser {
                             break;
                         case "endmenu":
                             return m;
+                        case "visible":
+                            t.nextToken();
+                            m.setVisibleIf(new ConditionParser(environment).parse(t));
+                            break;
                         case "if":
                             ifStack.push(new Condition(readExpression(t)));
                             break;

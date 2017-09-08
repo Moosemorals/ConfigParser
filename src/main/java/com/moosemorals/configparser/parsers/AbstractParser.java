@@ -29,12 +29,12 @@ import com.moosemorals.configparser.Environment;
 import com.moosemorals.configparser.ParseError;
 import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.values.Default;
-import com.moosemorals.configparser.values.Imply;
 import com.moosemorals.configparser.values.Prompt;
-import com.moosemorals.configparser.values.Range;
-import com.moosemorals.configparser.values.Select;
 import java.io.IOException;
 import java.io.StreamTokenizer;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,23 +44,25 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractParser {
 
+    private static final int TAB_WIDTH = 8;
+    
     public static final int COMMENT_CHAR = '#';
-    public static final int QUOTE_CHAR = '"';
+    public static final int DOUBLE_QUOTE_CHAR = '"';
+    public static final int QUOTE_CHAR = '\'';
 
     private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
     protected final Environment environment;
-    
+
     public AbstractParser(Environment e) {
         this.environment = e;
     }
-        
 
     /**
-     * Skip to the end of the line (or file) leaving the EOL/EOF on
-     * the stack.
+     * Skip to the end of the line (or file) leaving the EOL/EOF on the stack.
+     *
      * @param t
      * @return String skipped text
-     * @throws IOException 
+     * @throws IOException
      */
     protected String skip(SourceFile t) throws IOException {
         StringBuilder skipped = new StringBuilder();
@@ -96,11 +98,11 @@ public abstract class AbstractParser {
                 case '!':
                     token = t.nextToken();
                     if (token == '=') {
-                        result.append("!=");                        
+                        result.append("!=");
                     } else {
                         t.pushBack();
                         result.append("!");
-                    }                        
+                    }
                     result.append(readExpression(t));
                     break;
                 case '=':
@@ -115,7 +117,9 @@ public abstract class AbstractParser {
                     }
                     result.append(symbol);
                     break;
-                case QUOTE_CHAR:                    
+                case QUOTE_CHAR:
+                case DOUBLE_QUOTE_CHAR:
+
                     result.append('"');
                     result.append(t.getTokenString());
                     result.append('"');
@@ -144,6 +148,8 @@ public abstract class AbstractParser {
         Condition c = null;
         if (token == StreamTokenizer.TT_WORD && t.getTokenString().equals("if")) {
             c = new ConditionParser(environment).parse(t);
+        } else {
+            t.pushBack();
         }
         e.addDefault(new Default(def, c));
     }
@@ -157,36 +163,44 @@ public abstract class AbstractParser {
     }
 
     protected void readHelp(SourceFile t, Entry e) throws IOException {
-        if (t.currentToken() != StreamTokenizer.TT_EOL) {
-            skip(t);
+        while (t.currentToken() != StreamTokenizer.TT_EOL) {
+            t.nextToken();
         }
-        t.nextToken();
+
         String line = t.readLine();
         if (line == null) {
-            // EOF
+            // EOF            
             return;
         }
         while (line.length() == 0) {
             line = t.readLine();
             if (line == null) {
-                // EOF
+                // EOF                
                 return;
             }
         }
-        line = line.replace("\t", "        ");
+        line = tabsToSpaces(line);
         int indent = line.indexOf(line.trim());
+        line = line.trim();
         if (indent == 0) {
-            // No help
+            // No help            
             return;
         }
+
         StringBuilder help = new StringBuilder();
         help.append(line);
         while ((line = t.readLine()) != null) {
             int offset = 0;
-            if (line.length() > 0) {
-                line = line.replace("\t", "        ");
-                offset = line.indexOf(line.trim());
+            if (line.matches("\\s+")) {
+                line = "";
             }
+
+            if (line.length() > 0) {
+                line = tabsToSpaces(line);
+                offset = line.indexOf(line.trim());
+                line = line.trim();
+            }
+
             if (offset < indent) {
                 if (line.length() > 0) {
                     t.unreadLine(line);
@@ -214,7 +228,7 @@ public abstract class AbstractParser {
                     throw new ParseError(t, "option env needs an '='");
                 }
                 token = t.nextToken();
-                if (token != QUOTE_CHAR) {
+                if (token != QUOTE_CHAR && token != DOUBLE_QUOTE_CHAR) {
                     throw new ParseError(t, "option env needs a quoted string");
                 }
                 String envName = t.getTokenString();
@@ -232,7 +246,7 @@ public abstract class AbstractParser {
 
     protected void readPrompt(SourceFile t, Entry e) throws IOException {
         int token = t.nextToken();
-        if (token == QUOTE_CHAR) {
+        if (token == QUOTE_CHAR || token == DOUBLE_QUOTE_CHAR) {
             String prompt = t.getTokenString();
             token = t.nextToken();
             Condition c = null;
@@ -243,12 +257,14 @@ public abstract class AbstractParser {
         }
     }
 
- 
-
     protected void readType(SourceFile t, Entry e) throws IOException {
-        e.setType(t.getTokenString());
+        String type = t.getTokenString();
+        if ("boolean".equals(type)) {
+            type = "bool";
+        }
+        e.setType(type);
         int token = t.nextToken();
-        if (token == QUOTE_CHAR) {
+        if (token == QUOTE_CHAR || token == DOUBLE_QUOTE_CHAR) {
             t.pushBack();
             readPrompt(t, e);
         }
@@ -256,8 +272,21 @@ public abstract class AbstractParser {
 
     protected void readTypeWithDef(SourceFile t, Entry e) throws IOException {
         String type = t.getTokenString();
-        e.setType(type.substring("dev_".length()));
+        e.setType(type.substring("def_".length()));
         readDefault(t, e);
+    }
+
+    private static String tabsToSpaces(String original) {
+        Pattern p = Pattern.compile("\\t");
+        Matcher m = p.matcher(original);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            int offset = m.start() % TAB_WIDTH;
+            String spaces = String.join("", Collections.nCopies(TAB_WIDTH - offset, " "));
+            m.appendReplacement(sb, spaces);
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 }

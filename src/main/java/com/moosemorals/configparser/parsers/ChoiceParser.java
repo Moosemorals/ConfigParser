@@ -44,14 +44,13 @@ public class ChoiceParser extends AbstractParser {
         super(e);
     }
 
-    
     public Choice parse(SourceFile t) throws IOException {
 
         Choice c;
         if (!"choice".equals(t.getTokenString())) {
             throw new ParseError(t, "Must be called on choice");
         }
-        
+
         String symbol = null;
         if (t.nextToken() == StreamTokenizer.TT_WORD) {
             symbol = t.getTokenString();
@@ -62,7 +61,7 @@ public class ChoiceParser extends AbstractParser {
         c = new Choice(symbol);
 
         while (true) {
-            int token = t.nextToken();            
+            int token = t.nextToken();
             switch (token) {
                 case StreamTokenizer.TT_EOF:
                     t.pushBack();
@@ -70,12 +69,17 @@ public class ChoiceParser extends AbstractParser {
                 case StreamTokenizer.TT_WORD:
                     switch (t.getTokenString()) {
                         case "config":
-                            c.addConfig(new ConfigParser(environment).parse(t));
+                            c.addEntry(new ConfigParser(environment).parse(t));
                             break;
                         case "endchoice":
-                        
                             t.pushBack();
                             return c;
+                        case "comment":
+                            c.addEntry(new CommentParser(environment).parse(t));
+                            break;
+                        case "source":
+                            t = source(t);
+                            break;
                         case "string":
                         case "bool":
                         case "tristate":
@@ -103,9 +107,13 @@ public class ChoiceParser extends AbstractParser {
                         case "prompt":
                             readPrompt(t, c);
                             break;
-                        
+
                         default:
-                            log.debug("skipping {}", skip(t));
+                            String skipped = skip(t);
+                            if (skipped.length() > 0) {
+                                log.debug("Choice {}", c);
+                                throw new ParseError(t, "Skipping stuff [" + skipped + "]");
+                            }
                             //skip(t);
                             break;
                     }

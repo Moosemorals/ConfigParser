@@ -38,19 +38,19 @@ public class Choice extends Entry {
 
     private final Logger log = LoggerFactory.getLogger(Choice.class);
 
-    private final List<Config> configs;
+    private final List<Entry> entries;
 
     public Choice(String symbol) {
         super(symbol);
-        this.configs = new LinkedList<>();
+        this.entries = new LinkedList<>();
     }
 
-    public void addConfig(Config e) {
-        configs.add(e);
+    public void addEntry(Entry e) {
+        entries.add(e);
     }
 
-    public List<Config> getConfigs() {
-        return configs;
+    public List<Entry> getConfigs() {
+        return entries;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Choice extends Entry {
 
         xml.add("defaults", defaults);
         xml.add("depends", depends);
-        xml.add("configs", configs);
+        xml.add("configs", entries);
         
         xml.end();
     }

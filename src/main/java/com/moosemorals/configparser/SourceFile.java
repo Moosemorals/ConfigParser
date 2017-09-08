@@ -36,17 +36,22 @@ import org.slf4j.LoggerFactory;
 
 public final class SourceFile {
 
+    private static File base;
     private final Logger log = LoggerFactory.getLogger(SourceFile.class);
     private final static int PUSHBACK_BUFFER_SIZE = 8 * 1024; // Probably overkill.
     private final StreamTokenizer t;
     private final ConfigFileReader in;
-    private final File target;
+    private final String target;
     private int lines = 0;
+    
+    public static void setBase(File base) {
+        SourceFile.base = base;
+    }
 
-    public SourceFile(File target) throws IOException {
+    public SourceFile(String target) throws IOException {
         this.target = target;
         try {
-            in = new ConfigFileReader(new PushbackReader(new FileReader(target), PUSHBACK_BUFFER_SIZE));
+            in = new ConfigFileReader(new PushbackReader(new FileReader(new File(base, target)), PUSHBACK_BUFFER_SIZE));
         } catch (FileNotFoundException ex) {
             throw new ParseError(this, "Can't find target");
         }
@@ -60,6 +65,7 @@ public final class SourceFile {
         t.slashSlashComments(false);
         t.slashStarComments(false);
         t.quoteChar(AbstractParser.QUOTE_CHAR);
+        t.quoteChar(AbstractParser.DOUBLE_QUOTE_CHAR);
         t.wordChars('a', 'z');
         t.wordChars('A', 'Z');
         t.wordChars('0', '9');
@@ -119,10 +125,6 @@ public final class SourceFile {
         in.unread(line.toCharArray());
     }
 
-    public String getPath() {
-        return target.getPath();
-    }
-
     @Override
     public String toString() {
         return "KconfigFile{" + "t=" + t + ", target=" + target + '}';
@@ -134,5 +136,9 @@ public final class SourceFile {
         } else {
             return 0;
         }
+    }
+    
+    public String getLocation() {
+        return String.format("%s: %d", target, getLineNumber());
     }
 }

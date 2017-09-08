@@ -39,6 +39,7 @@ public class Menu extends Entry {
     private final Logger log = LoggerFactory.getLogger(Menu.class);
 
     private final List<Entry> entries;
+    private Condition visibleIf;
 
     public Menu(String symbol) {
         super(symbol);
@@ -51,6 +52,14 @@ public class Menu extends Entry {
 
     public List<Entry> getEntries() {
         return entries;
+    }
+
+    public Condition getVisibleIf() {
+        return visibleIf;
+    }
+
+    public void setVisibleIf(Condition visibleIf) {
+        this.visibleIf = visibleIf;
     }
 
     @Override
@@ -68,10 +77,13 @@ public class Menu extends Entry {
     @Override
     public void toXML(XML xml) throws XMLStreamException {
         xml.start("menu");
-        xml.add(prompt);        
+        if (visibleIf != null) {
+            xml.add("visibleIf", visibleIf.toString());
+        }
+        xml.add(prompt);
         xml.add("depends", depends);
         xml.add("entries", entries);
-        
+
         xml.end();
     }
 

@@ -84,6 +84,7 @@ public class ConfigParser extends AbstractParser {
                             return e;
                         case "string":
                         case "bool":
+                        case "boolean":
                         case "tristate":
                         case "int":
                         case "hex":
@@ -99,7 +100,7 @@ public class ConfigParser extends AbstractParser {
                         case "depends":
                             readDepends(t, e);
                             break;
-                        case "implies":
+                        case "imply":
                             readImply(t, e);
                             break;
                         case "help":
@@ -109,6 +110,9 @@ public class ConfigParser extends AbstractParser {
                         case "option":
                             readOption(t, e);
                             break;
+                        case "prompt":
+                            readPrompt(t, e);
+                            break;
                         case "range":
                             readRange(t, e);
                             break;
@@ -116,8 +120,12 @@ public class ConfigParser extends AbstractParser {
                             readSelect(t, e);
                             break;
 
-                        default:
-                            log.debug("config skipping {}", skip(t));
+                        default:                            
+                            String skipped = skip(t);
+                            if (skipped.length() > 0) {
+                                log.debug("Entry {}", e);
+                                throw new ParseError(t, "Skipping stuff [" + skipped + "]");
+                            }                            
                             //skip(t);
                             break;
                     }
