@@ -81,7 +81,11 @@ public class Menu extends Entry {
         if (visibleIf != null) {
             xml.add("visibleIf", visibleIf.toString());
         }
-        xml.add(prompt);
+
+        if (prompt != null) {
+            xml.add("prompt", prompt);
+        }
+
         xml.add("depends", depends);
         xml.add("entries", entries);
 

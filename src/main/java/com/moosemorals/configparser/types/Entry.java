@@ -39,7 +39,7 @@ public abstract class Entry implements XMLable {
     protected final List<Condition> depends;
     protected String type;
     protected String value;
-    protected Prompt prompt;
+    protected String prompt;
     protected String help;
 
     public Entry(Location location, String symbol) {
@@ -65,12 +65,16 @@ public abstract class Entry implements XMLable {
         this.value = value;
     }
 
-    public Prompt getPrompt() {
+    public String getPrompt() {
         return prompt;
     }
 
     public void setPrompt(Prompt prompt) {
-        this.prompt = prompt;
+        this.prompt = prompt.getValue();
+        Condition condition = prompt.getCondition();
+        if (condition != null) {
+            addDepends(prompt.getCondition());
+        }
     }
 
     public String getType() {

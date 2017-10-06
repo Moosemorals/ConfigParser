@@ -90,14 +90,15 @@ public class Config extends Entry {
         xml.add("type", type);
         xml.add("value", value);
         xml.add("help", help);
+
         if (prompt != null) {
-            xml.add(prompt);
+            xml.add("prompt", prompt);
         }
 
         xml.add("defaults", defaults);
         xml.add("depends", depends);
         xml.add("selects", selects);
-        xml.add("implies", selects);
+        xml.add("implies", implies);
         xml.add("ranges", ranges);
 
         xml.end();

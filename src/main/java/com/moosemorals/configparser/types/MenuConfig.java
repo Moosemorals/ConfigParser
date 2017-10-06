@@ -49,7 +49,7 @@ public class MenuConfig extends Config {
         xml.add("value", value);
         xml.add("help", help);
         if (prompt != null) {
-            xml.add(prompt);
+            xml.add("prompt", prompt);
         }
 
         xml.add("defaults", defaults);

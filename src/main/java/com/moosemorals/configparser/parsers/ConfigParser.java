@@ -41,15 +41,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ConfigParser extends AbstractParser {
+class ConfigParser extends AbstractParser {
 
     private final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 
-    public ConfigParser(MenuParser parentParser, Environment e) {
+    ConfigParser(MenuParser parentParser, Environment e) {
         super(parentParser, e);
     }
 
-    public Config parse(SourceFile t) throws IOException {
+    Config parse(SourceFile t) throws IOException {
 
         Config e;
         String type = t.getTokenString();
@@ -126,12 +126,12 @@ public class ConfigParser extends AbstractParser {
                             readSelect(t, e);
                             break;
 
-                        default:                            
+                        default:
                             String skipped = skip(t);
                             if (skipped.length() > 0) {
                                 log.debug("Entry {}", e);
                                 throw new ParseError(t, "Skipping stuff [" + skipped + "]");
-                            }                            
+                            }
                             //skip(t);
                             break;
                     }
@@ -140,7 +140,7 @@ public class ConfigParser extends AbstractParser {
         }
     }
 
-    protected void readRange(SourceFile t, Config conf) throws IOException {
+    private void readRange(SourceFile t, Config conf) throws IOException {
         t.nextToken();
         String value1 = t.getTokenString();
         t.nextToken();
@@ -153,7 +153,7 @@ public class ConfigParser extends AbstractParser {
         conf.addRange(new Range(value1, value2, c));
     }
 
-    protected void readSelect(SourceFile t, Config conf) throws IOException {
+    private void readSelect(SourceFile t, Config conf) throws IOException {
         String select = readExpression(t);
         int token = t.nextToken();
         Condition c = null;
@@ -163,7 +163,7 @@ public class ConfigParser extends AbstractParser {
         conf.addSelect(new Select(select, c));
     }
 
-    protected void readImply(SourceFile t, Config conf) throws IOException {
+    private void readImply(SourceFile t, Config conf) throws IOException {
         String imply = readExpression(t);
         int token = t.nextToken();
         Condition c = null;

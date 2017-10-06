@@ -113,8 +113,9 @@ public class Comment extends Entry {
         xml.start("comment", "file", location.getFile(), "line", location.getLine());
 
         if (prompt != null) {
-            xml.add(prompt);
+            xml.add("prompt", prompt);
         }
+
         xml.add("depends", depends);
 
         xml.end();

@@ -61,12 +61,15 @@ public class Choice extends Entry {
         xml.add("type", type);
         xml.add("value", value);
         xml.add("help", help);
-        xml.add(prompt);
+
+        if (prompt != null) {
+            xml.add("prompt", prompt);
+        }
 
         xml.add("defaults", defaults);
         xml.add("depends", depends);
         xml.add("configs", entries);
-        
+
         xml.end();
     }
 

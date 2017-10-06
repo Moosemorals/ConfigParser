@@ -55,6 +55,10 @@ public abstract class ConditionalValue implements XMLable {
         return condition.evaluate();
     }
 
+    public Condition getCondition() {
+        return condition;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -83,30 +87,30 @@ public abstract class ConditionalValue implements XMLable {
         }
         return true;
     }
-    
-    
-    
+
+
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("[").append(value);
         if (condition != null) {
             result.append(" if ").append(condition.toString());
-        }        
+        }
         result.append("]");
         return result.toString();
     }
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        
-        
+
+
         if (condition != null) {
-            xml.add(getClass().getSimpleName().toLowerCase(), value, "if", condition.toString());            
+            xml.add(getClass().getSimpleName().toLowerCase(), value, "if", condition.toString());
         }        else {
             xml.add(getClass().getSimpleName().toLowerCase(), value);
         }
-        
+
     }
 
 }
