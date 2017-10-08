@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractParser {
 
     private static final int TAB_WIDTH = 8;
-    
+
     public static final int COMMENT_CHAR = '#';
     public static final int DOUBLE_QUOTE_CHAR = '"';
     public static final int QUOTE_CHAR = '\'';
@@ -174,20 +174,20 @@ public abstract class AbstractParser {
 
         String line = t.readLine();
         if (line == null) {
-            // EOF            
+            // EOF
             return;
         }
         while (line.length() == 0) {
             line = t.readLine();
             if (line == null) {
-                // EOF                
+                // EOF
                 return;
             }
         }
         line = tabsToSpaces(line);
-        int indent = line.indexOf(line.trim());        
+        int indent = line.indexOf(line.trim());
         if (indent == 0) {
-            // No help            
+            // No help
             return;
         }
 
@@ -201,13 +201,13 @@ public abstract class AbstractParser {
 
             if (line.length() > 0) {
                 line = tabsToSpaces(line);
-                offset = line.indexOf(line.trim());                
+                offset = line.indexOf(line.trim());
             }
 
             if (offset < indent) {
                 if (line.length() > 0) {
                     t.unreadLine(line);
-                    break;                
+                    break;
                 } else {
                     help.append("\n");
                 }
@@ -236,7 +236,7 @@ public abstract class AbstractParser {
                 }
                 String envName = t.getTokenString();
                 if (environment.contains(envName)) {
-                    e.setValue(environment.get(envName));
+                    e.setEnv(environment.get(envName));
                 }
                 break;
             default:

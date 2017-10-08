@@ -44,11 +44,6 @@ public class Comment extends Entry {
     }
 
     @Override
-    public boolean hasValue() {
-        return false;
-    }
-
-    @Override
     public List<Default> getDefaults() {
         throw new UnsupportedOperationException("Comments dont have defaults");
     }
@@ -79,13 +74,13 @@ public class Comment extends Entry {
     }
 
     @Override
-    public void setValue(String value) {
-        throw new UnsupportedOperationException("Comments dont have a value");
+    public void setEnv(String env) {
+        throw new UnsupportedOperationException("Comments dont have a env");
     }
 
     @Override
-    public String getValue() {
-        throw new UnsupportedOperationException("Comments dont have a value");
+    public String getEnv() {
+        throw new UnsupportedOperationException("Comments dont have a env");
     }
 
     @Override

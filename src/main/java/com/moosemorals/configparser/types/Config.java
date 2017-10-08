@@ -88,7 +88,7 @@ public class Config extends Entry {
         xml.start("config", "file", location.getFile(), "line", location.getLine());
         xml.add("symbol", symbol);
         xml.add("type", type);
-        xml.add("value", value);
+        xml.add("env", env);
         xml.add("help", help);
 
         if (prompt != null) {

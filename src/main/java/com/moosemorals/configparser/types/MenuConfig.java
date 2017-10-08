@@ -46,7 +46,7 @@ public class MenuConfig extends Config {
         xml.start("menuconfig", "file", location.getFile(), "line", location.getLine());
         xml.add("symbol", symbol);
         xml.add("type", type);
-        xml.add("value", value);
+        xml.add("env", env);
         xml.add("help", help);
         if (prompt != null) {
             xml.add("prompt", prompt);

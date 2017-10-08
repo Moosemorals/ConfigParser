@@ -38,7 +38,7 @@ public abstract class Entry implements XMLable {
     protected final List<Default> defaults;
     protected final List<Condition> depends;
     protected String type;
-    protected String value;
+    protected String env;
     protected String prompt;
     protected String help;
 
@@ -53,16 +53,12 @@ public abstract class Entry implements XMLable {
         return this.symbol;
     }
 
-    public boolean hasValue() {
-        return value != null;
+    public String getEnv() {
+        return env;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+    public void setEnv(String env) {
+        this.env = env;
     }
 
     public String getPrompt() {
@@ -117,8 +113,8 @@ public abstract class Entry implements XMLable {
         if (type != null) {
             result.append("(").append(type).append(")");
         }
-        if (value != null) {
-            result.append("=").append(value);
+        if (env != null) {
+            result.append("=").append(env);
         }
         if (prompt != null) {
             result.append(" '").append(prompt).append("'");
