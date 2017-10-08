@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ChoiceParser extends AbstractParser {
+public class ChoiceParser extends BaseParser {
 
     private final Logger log = LoggerFactory.getLogger(ChoiceParser.class);
 
@@ -45,7 +45,7 @@ public class ChoiceParser extends AbstractParser {
         super(parentParser, e);
     }
 
-    public Choice parse(SourceFile t) throws IOException {        
+    public Choice parse(SourceFile t) throws IOException {
         Choice c;
         if (!"choice".equals(t.getTokenString())) {
             throw new ParseError(t, "Must be called on choice");
@@ -72,7 +72,7 @@ public class ChoiceParser extends AbstractParser {
                         case "config":
                             c.addEntry(parentMenu.applyIfStack(new ConfigParser(parentMenu, environment).parse(t)));
                             break;
-                        case "endchoice":                            
+                        case "endchoice":
                             t.pushBack();
                             return c;
                         case "comment":

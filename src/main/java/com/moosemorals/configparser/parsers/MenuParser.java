@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MenuParser extends AbstractParser {
+public class MenuParser extends BaseParser {
 
     public static final Logger log = LoggerFactory.getLogger(MenuParser.class);
 

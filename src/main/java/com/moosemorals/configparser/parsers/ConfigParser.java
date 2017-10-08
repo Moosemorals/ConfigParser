@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-class ConfigParser extends AbstractParser {
+class ConfigParser extends BaseParser {
 
     private final Logger log = LoggerFactory.getLogger(ConfigParser.class);
 

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class CommentParser extends AbstractParser {
+public class CommentParser extends BaseParser {
 
     private final Logger log = LoggerFactory.getLogger(CommentParser.class);
 
@@ -44,17 +44,17 @@ public class CommentParser extends AbstractParser {
         super(parentParser, e);
     }
 
-    public Comment parse(SourceFile t) throws IOException {                        
+    public Comment parse(SourceFile t) throws IOException {
         if (!"comment".equals(t.getTokenString())) {
             throw new ParseError(t, "Must be called on comment");
         }
-        
+
         Comment c = new Comment(t.getLocation(), null);
 
         readPrompt(t, c);
 
         while (true) {
-            int token = t.nextToken();            
+            int token = t.nextToken();
             switch (token) {
                 case StreamTokenizer.TT_EOF:
                     t.pushBack();
@@ -70,13 +70,13 @@ public class CommentParser extends AbstractParser {
                         case "endmenu":
                         case "if":
                         case "endif":
-                        case "source":                        
+                        case "source":
                             t.pushBack();
                             return c;
                         case "depends":
                             readDepends(t, c);
                             break;
-                        
+
                         default:
                             log.debug("skipping {}", skip(t));
                             //skip(t);

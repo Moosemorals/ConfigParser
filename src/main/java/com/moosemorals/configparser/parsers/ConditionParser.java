@@ -37,20 +37,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public class ConditionParser extends AbstractParser {
+public class ConditionParser extends BaseParser {
 
     private final Logger log = LoggerFactory.getLogger(ConditionParser.class);
-    
+
     public ConditionParser(MenuParser parentParser, Environment e) {
         super(parentParser, e);
     }
-    
+
     Condition parse(SourceFile t) throws IOException {
         if (t.currentToken() != StreamTokenizer.TT_WORD && !t.getTokenString().equals("if")) {
             throw new ParseError(t, "Must start parsing condition on an 'if'");
         }
-        
-        return new Condition(readExpression(t));            
+
+        return new Condition(readExpression(t));
     }
 
 }

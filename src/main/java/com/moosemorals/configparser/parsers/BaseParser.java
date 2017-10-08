@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Osric Wilkinson (osric@fluffypeople.com)
  */
-public abstract class AbstractParser {
+public abstract class BaseParser {
 
     private static final int TAB_WIDTH = 8;
 
@@ -50,11 +50,11 @@ public abstract class AbstractParser {
     public static final int DOUBLE_QUOTE_CHAR = '"';
     public static final int QUOTE_CHAR = '\'';
 
-    private final Logger log = LoggerFactory.getLogger(AbstractParser.class);
+    private final Logger log = LoggerFactory.getLogger(BaseParser.class);
     protected final Environment environment;
     protected final MenuParser parentMenu;
 
-    public AbstractParser(MenuParser parentParser, Environment e) {
+    public BaseParser(MenuParser parentParser, Environment e) {
         this.parentMenu = parentParser;
         this.environment = e;
     }

@@ -23,7 +23,7 @@
  */
 package com.moosemorals.configparser;
 
-import com.moosemorals.configparser.parsers.AbstractParser;
+import com.moosemorals.configparser.parsers.BaseParser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -59,8 +59,8 @@ public final class SourceFile {
         t.eolIsSignificant(true);
         t.slashSlashComments(false);
         t.slashStarComments(false);
-        t.quoteChar(AbstractParser.QUOTE_CHAR);
-        t.quoteChar(AbstractParser.DOUBLE_QUOTE_CHAR);
+        t.quoteChar(BaseParser.QUOTE_CHAR);
+        t.quoteChar(BaseParser.DOUBLE_QUOTE_CHAR);
         t.wordChars('a', 'z');
         t.wordChars('A', 'Z');
         t.wordChars('0', '9');
@@ -96,7 +96,7 @@ public final class SourceFile {
         int c;
         boolean inComment = false;
         while ((c = in.read()) != -1) {
-            if (c == AbstractParser.COMMENT_CHAR) {
+            if (c == BaseParser.COMMENT_CHAR) {
                 inComment = true;
             } else if (c != '\n') {
                 if (!inComment) {
@@ -134,7 +134,7 @@ public final class SourceFile {
     }
 
     public Location getLocation() {
-        return new Location(target, getLineNumber());        
+        return new Location(target, getLineNumber());
     }
 
     /**
@@ -146,7 +146,7 @@ public final class SourceFile {
         private final Logger log = LoggerFactory.getLogger(Location.class);
         private final String file;
         private final String line;
-        
+
         public Location(String file, int line) {
             this.file = file;
             this.line = String.format("%d", line);
@@ -159,11 +159,11 @@ public final class SourceFile {
         public String getLine() {
             return line;
         }
-        
+
         @Override
         public String toString() {
             return String.format("%s: %s", file, line);
         }
-        
+
     }
 }
