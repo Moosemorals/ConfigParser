@@ -42,6 +42,8 @@ public class Config extends Entry {
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
+    protected final String TYPE_NAME = "config";
+
     protected final List<Select> selects;
     protected final List<Imply> implies;
     protected final List<Range> ranges;
@@ -59,18 +61,10 @@ public class Config extends Entry {
         }
     }
 
-    public List<Select> getSelects() {
-        return selects;
-    }
-
     public void addImplies(Imply imply) {
         if (!implies.contains(imply)) {
             implies.add(imply);
         }
-    }
-
-    public List<Imply> getImplies() {
-        return implies;
     }
 
     public void addRange(Range range) {
@@ -79,29 +73,12 @@ public class Config extends Entry {
         }
     }
 
-    public List<Range> getRanges() {
-        return ranges;
-    }
-
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("config", "file", location.getFile(), "line", location.getLine());
-        xml.add("symbol", symbol);
-        xml.add("type", type);
-        xml.add("env", env);
-        xml.add("help", help);
-
-        if (prompt != null) {
-            xml.add("prompt", prompt);
-        }
-
-        xml.add("defaults", defaults);
-        xml.add("depends", depends);
-        xml.add("selects", selects);
-        xml.add("implies", implies);
-        xml.add("ranges", ranges);
-
-        xml.end();
+        super.toXML(xml, "config", x -> {
+            xml.add("selects", selects);
+            xml.add("implies", selects);
+            xml.add("ranges", ranges);
+        });
     }
-
 }

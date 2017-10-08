@@ -240,8 +240,7 @@ public abstract class BaseParser {
                 }
                 break;
             default:
-                // ignore options
-                skip(t);
+                e.addOption(t.getTokenString());
                 t.nextToken(); // throw away EOL
                 break;
         }

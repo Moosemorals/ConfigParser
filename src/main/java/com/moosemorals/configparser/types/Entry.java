@@ -25,11 +25,15 @@ package com.moosemorals.configparser.types;
 
 import com.moosemorals.configparser.SourceFile;
 import com.moosemorals.configparser.SourceFile.Location;
+import com.moosemorals.configparser.XML;
 import com.moosemorals.configparser.XMLable;
 import com.moosemorals.configparser.values.Default;
 import com.moosemorals.configparser.values.Prompt;
+
+import javax.xml.stream.XMLStreamException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class Entry implements XMLable {
 
@@ -37,6 +41,7 @@ public abstract class Entry implements XMLable {
     protected final String symbol;
     protected final List<Default> defaults;
     protected final List<Condition> depends;
+    protected final List<String> options;
     protected String type;
     protected String env;
     protected String prompt;
@@ -47,6 +52,7 @@ public abstract class Entry implements XMLable {
         this.symbol = symbol;
         this.defaults = new LinkedList<>();
         this.depends = new LinkedList<>();
+        this.options = new LinkedList<>();
     }
 
     public String getSymbol() {
@@ -103,6 +109,10 @@ public abstract class Entry implements XMLable {
         defaults.add(def);
     }
 
+    public void addOption(String option) {
+        options.add(option);
+    }
+
     public List<Default> getDefaults() {
         return defaults;
     }
@@ -143,6 +153,35 @@ public abstract class Entry implements XMLable {
 
         result.append("]");
         return result.toString();
+    }
+
+    protected void toXML(XML xml, String typename, XMLGenerator xmlConsumer) throws XMLStreamException {
+        xml.start(typename, "file", location.getFile(), "line", location.getLine());
+        xml.add("symbol", symbol);
+        xml.add("type", type);
+        xml.add("env", env);
+        xml.add("help", help);
+        xml.add("prompt", prompt);
+        xml.add("defaults", defaults);
+        xml.add("depends", depends);
+
+        if (!options.isEmpty()) {
+            xml.start("options");
+            for (String option : options) {
+                xml.add("option", option);
+            }
+            xml.end();
+        }
+
+        if (xmlConsumer != null) {
+            xmlConsumer.generate(xml);
+        }
+
+        xml.end();
+    }
+
+    public interface XMLGenerator {
+        void generate(XML xml) throws XMLStreamException;
     }
 
 }

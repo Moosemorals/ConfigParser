@@ -45,8 +45,7 @@ public class XML {
         xml.writeStartDocument();
     }
 
-    public void start(String name, String... attr) throws XMLStreamException {
-        xml.writeStartElement(name);
+    private void writeAttributes(String[] attr) throws XMLStreamException {
         if (attr != null) {
             if (attr.length % 2 != 0) {
                 throw new IllegalArgumentException("Attributes must come in pairs");
@@ -57,20 +56,18 @@ public class XML {
         }
     }
 
+    public void start(String name, String... attr) throws XMLStreamException {
+        xml.writeStartElement(name);
+        writeAttributes(attr);
+    }
+
     public void add(String name, String content, String... attr) throws XMLStreamException {
         if (content != null) {
             xml.writeStartElement(name);
         } else {
             xml.writeEmptyElement(name);
         }
-        if (attr != null) {
-            if (attr.length % 2 != 0) {
-                throw new IllegalArgumentException("Attributes must come in pairs");
-            }
-            for (int i = 0; i < attr.length; i += 2) {
-                xml.writeAttribute(attr[i], attr[i + 1]);
-            }
-        }
+        writeAttributes(attr);
         if (content != null) {
             xml.writeCharacters(content);
             xml.writeEndElement();
@@ -88,6 +85,14 @@ public class XML {
 
     public void add(XMLable other) throws XMLStreamException {
         other.toXML(this);
+    }
+
+    public void add(String name, XMLable other) throws XMLStreamException {
+        if (other != null) {
+            xml.writeStartElement(name);
+            other.toXML(this);
+            xml.writeEndElement();
+        }
     }
 
     public void add(String name) throws XMLStreamException {

@@ -193,6 +193,9 @@ public class MenuParser extends BaseParser {
                         case "depends":
                             readDepends(t, m);
                             break;
+                        case "option":
+                            readOption(t, m);
+                            break;
                         default:
                             String skipped = skip(t);
                             if (skipped.length() > 0) {

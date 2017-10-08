@@ -44,46 +44,6 @@ public class Comment extends Entry {
     }
 
     @Override
-    public List<Default> getDefaults() {
-        throw new UnsupportedOperationException("Comments dont have defaults");
-    }
-
-    @Override
-    public void addDefault(Default def) {
-        throw new UnsupportedOperationException("Comments dont have defaults");
-    }
-
-    @Override
-    public void setHelp(String help) {
-        throw new UnsupportedOperationException("Comments dont have help");
-    }
-
-    @Override
-    public String getHelp() {
-        throw new UnsupportedOperationException("Comments dont have help");
-    }
-
-    @Override
-    public void setType(String type) {
-        throw new UnsupportedOperationException("Comments dont have a type");
-    }
-
-    @Override
-    public String getType() {
-        throw new UnsupportedOperationException("Comments dont have a type");
-    }
-
-    @Override
-    public void setEnv(String env) {
-        throw new UnsupportedOperationException("Comments dont have a env");
-    }
-
-    @Override
-    public String getEnv() {
-        throw new UnsupportedOperationException("Comments dont have a env");
-    }
-
-    @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
 
@@ -105,15 +65,7 @@ public class Comment extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("comment", "file", location.getFile(), "line", location.getLine());
-
-        if (prompt != null) {
-            xml.add("prompt", prompt);
-        }
-
-        xml.add("depends", depends);
-
-        xml.end();
+        super.toXML(xml, "comment", null);
     }
 
 }

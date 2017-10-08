@@ -37,28 +37,19 @@ public class MenuConfig extends Config {
 
     private final Logger log = LoggerFactory.getLogger(MenuConfig.class);
 
+    protected final String TYPE_NAME = "menuconfig";
+
     public MenuConfig(SourceFile.Location location, String symbol) {
         super(location, symbol);
     }
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("menuconfig", "file", location.getFile(), "line", location.getLine());
-        xml.add("symbol", symbol);
-        xml.add("type", type);
-        xml.add("env", env);
-        xml.add("help", help);
-        if (prompt != null) {
-            xml.add("prompt", prompt);
-        }
-
-        xml.add("defaults", defaults);
-        xml.add("depends", depends);
-        xml.add("selects", selects);
-        xml.add("implies", selects);
-        xml.add("ranges", ranges);
-
-        xml.end();
+        super.toXML(xml, "menuconfig", x -> {
+            xml.add("selects", selects);
+            xml.add("implies", selects);
+            xml.add("ranges", ranges);
+        });
     }
 
 }

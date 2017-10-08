@@ -50,27 +50,10 @@ public class Choice extends Entry {
         entries.add(e);
     }
 
-    public List<Entry> getConfigs() {
-        return entries;
-    }
-
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("choice", "file", location.getFile(), "line", location.getLine());
-        xml.add("symbol", symbol);
-        xml.add("type", type);
-        xml.add("env", env);
-        xml.add("help", help);
-
-        if (prompt != null) {
-            xml.add("prompt", prompt);
-        }
-
-        xml.add("defaults", defaults);
-        xml.add("depends", depends);
-        xml.add("configs", entries);
-
-        xml.end();
+        super.toXML(xml, "choice", x -> {
+            xml.add("entries", entries);
+        });
     }
-
 }

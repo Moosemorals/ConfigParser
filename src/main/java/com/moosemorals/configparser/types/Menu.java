@@ -51,14 +51,6 @@ public class Menu extends Entry {
         entries.add(e);
     }
 
-    public List<Entry> getEntries() {
-        return entries;
-    }
-
-    public Condition getVisibleIf() {
-        return visibleIf;
-    }
-
     public void setVisibleIf(Condition visibleIf) {
         this.visibleIf = visibleIf;
     }
@@ -77,19 +69,10 @@ public class Menu extends Entry {
 
     @Override
     public void toXML(XML xml) throws XMLStreamException {
-        xml.start("menu", "file", location.getFile(), "line", location.getLine());
-        if (visibleIf != null) {
-            xml.add("visibleIf", visibleIf.toString());
-        }
-
-        if (prompt != null) {
-            xml.add("prompt", prompt);
-        }
-
-        xml.add("depends", depends);
-        xml.add("entries", entries);
-
-        xml.end();
+        super.toXML(xml, "menu", x -> {
+            xml.add("visibleIf", visibleIf);
+            xml.add("entries", entries);
+        });
     }
 
 }
